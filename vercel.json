@@ -1,13 +1,12 @@
 {
   "version": 2,
-  "framework": null,
-  "buildCommand": "npm run build:client",
-  "outputDirectory": "dist/public",
-  "installCommand": "npm install",
   "builds": [
     {
       "src": "package.json",
-      "use": "@vercel/static-build"
+      "use": "@vercel/static-build",
+      "config": {
+        "distDir": "dist/public"
+      }
     }
   ],
   "routes": [
