@@ -1,9 +1,9 @@
 {
   "version": 2,
   "framework": null,
-  "buildCommand": "pnpm run build:client",
+  "buildCommand": "npm run build:client",
   "outputDirectory": "dist/public",
-  "installCommand": "pnpm install --no-frozen-lockfile",
+  "installCommand": "npm install",
   "builds": [
     {
       "src": "package.json",
