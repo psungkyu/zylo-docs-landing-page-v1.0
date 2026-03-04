@@ -64,8 +64,8 @@ export default function CTASection() {
               
               {/* Address */}
               <div className="text-xs text-muted-foreground leading-relaxed">
-                <div>Room 309, 535 Bongcheon-ro, Gwanak-gu</div>
-                <div>Seoul 08789</div>
+                <div>Room 309, 535 Bongcheon-ro</div>
+                <div>Gwanak-gu, Seoul 08789</div>
                 <div>Republic of Korea</div>
               </div>
             </div>
