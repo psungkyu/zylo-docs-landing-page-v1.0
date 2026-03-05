@@ -104,7 +104,7 @@ export default function HeroSection() {
 
           {/* Subheadline */}
           <p className="text-base sm:text-lg lg:text-xl text-muted-foreground mb-8 leading-relaxed max-w-xl animate-fade-in-up delay-100">
-            Documentation that evolves with your product. Powered by GraphRAG and AI Agents, zylo-docs automatically syncs with your development cycles—keeping docs fresh, accurate, and always in sync.
+            Keeping your docs in sync is exhausting—development moves faster, and manual updates can’t keep up. zylo-docs syncs your documentation automatically so you can focus on building.
           </p>
 
           {/* CTA Buttons */}
