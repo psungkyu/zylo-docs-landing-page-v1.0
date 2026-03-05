@@ -53,21 +53,20 @@ function SolutionStep({ number, title, description, image, icon, accent }: StepP
           {description}
         </p>
 
-        {/* Key benefits */}
-        <ul className="space-y-3 mb-6">
+        <ul className="space-y-3">
           {number === 1 && (
             <>
               <li className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-2 flex-shrink-0" />
-                <span className="text-muted-foreground">Connect GitHub, Slack, Jira, and custom data sources</span>
+                <span className="text-muted-foreground">Product data analyzed as entities in the graph</span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-2 flex-shrink-0" />
-                <span className="text-muted-foreground">Build domain-specific knowledge graphs automatically</span>
+                <span className="text-muted-foreground">User activity modeled—what customers search and in what context</span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-2 flex-shrink-0" />
-                <span className="text-muted-foreground">Capture both product structure and user context</span>
+                <span className="text-muted-foreground">Foundation for step-by-step, trustworthy docs and solution suggestions</span>
               </li>
             </>
           )}
@@ -75,15 +74,15 @@ function SolutionStep({ number, title, description, image, icon, accent }: StepP
             <>
               <li className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-2 flex-shrink-0" />
-                <span className="text-muted-foreground">AI Agents autonomously generate documentation</span>
+                <span className="text-muted-foreground">Graph-based analysis of everything you connected</span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-2 flex-shrink-0" />
-                <span className="text-muted-foreground">Sync automatically with every code commit and release</span>
+                <span className="text-muted-foreground">Documentation and insights stay in sync with your product and code</span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-2 flex-shrink-0" />
-                <span className="text-muted-foreground">No manual updates needed—documentation stays fresh</span>
+                <span className="text-muted-foreground">Automatic sync with releases and changes—no manual updates</span>
               </li>
             </>
           )}
@@ -91,24 +90,19 @@ function SolutionStep({ number, title, description, image, icon, accent }: StepP
             <>
               <li className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-2 flex-shrink-0" />
-                <span className="text-muted-foreground">Deliver interactive, searchable documentation</span>
+                <span className="text-muted-foreground">Product manuals for customers</span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-2 flex-shrink-0" />
-                <span className="text-muted-foreground">40% fewer support tickets, 2x faster onboarding</span>
+                <span className="text-muted-foreground">RAG with MCP-connected LLM for search optimization</span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-2 flex-shrink-0" />
-                <span className="text-muted-foreground">Measure adoption and engagement in real-time</span>
+                <span className="text-muted-foreground">Chatbots</span>
               </li>
             </>
           )}
         </ul>
-
-        {/* CTA Button */}
-        <a href="https://tally.so/r/wgBlOO" target="_blank" rel="noopener noreferrer" className="inline-flex px-6 py-3 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-medium transition-colors">
-          Get Started
-        </a>
       </div>
 
       {number % 2 === 1 && (
@@ -128,27 +122,27 @@ export default function SolutionSection() {
   const steps = [
     {
       number: 1,
-      title: 'Ingest & Map',
+      title: 'Connect',
       description:
-        'Connect your entire tech stack. zylo-docs pulls real-time data from GitHub, Slack, Jira, and more to build a unified knowledge graph.',
+        'This step brings product data and user activity into your knowledge graph.',
       image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663133935411/cjL5fR4bHdyG5Ua4ZewFre/xylo_step1_ingest_bc5a369f.png',
       icon: <Database size={24} />,
       accent: 'blue' as const,
     },
     {
       number: 2,
-      title: 'Generate & Sync',
+      title: 'Analyze & Sync',
       description:
-        'AI Agents generate documentation from your knowledge graph. Every code commit triggers live updates—your docs evolve automatically.',
+        'This step turns connected data into usable insights and keeps them in sync.',
       image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663133935411/cjL5fR4bHdyG5Ua4ZewFre/xylo_step2_sync_a4efc240.png',
       icon: <Zap size={24} />,
       accent: 'amber' as const,
     },
     {
       number: 3,
-      title: 'Deploy & Engage',
+      title: 'Apply',
       description:
-        'Launch interactive documentation that users want to read. Track engagement and watch support tickets drop.',
+        'This step puts the graph to work in your channels.',
       image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663133935411/cjL5fR4bHdyG5Ua4ZewFre/xylo_step3_engage_a82f9f77.png',
       icon: <TrendingUp size={24} />,
       accent: 'green' as const,
@@ -158,14 +152,10 @@ export default function SolutionSection() {
   return (
     <section id="solution" className="relative pt-9 lg:pt-24 bg-gradient-to-b from-transparent via-blue-500/5 to-transparent">
       <div className="container">
-        {/* Section Header */}
         <div className="max-w-3xl mb-20">
-          <h2 className="text-4xl lg:text-5xl font-bold font-mono mb-6 text-foreground">
+          <h2 className="text-4xl lg:text-5xl font-bold font-mono text-foreground">
             How zylo-docs Works
           </h2>
-          <p className="text-lg text-muted-foreground leading-relaxed">
-            Three simple steps to transform your documentation from a maintenance burden into a competitive advantage. Watch your docs evolve with your product.
-          </p>
         </div>
 
         {/* Steps */}

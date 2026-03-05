@@ -40,7 +40,7 @@ export default function FeaturesSection() {
       icon: <Brain size={24} />,
       title: 'GraphRAG Engine',
       description:
-        'Neo4j-powered knowledge graphs that understand relationships between code, users, and features. Domain-specific AI that gets smarter with every sync.',
+        'Graph-based knowledge graphs that understand relationships between code, users, and features. Domain-specific AI that gets smarter with every sync.',
       accent: 'blue' as const,
     },
     {
@@ -112,15 +112,15 @@ export default function FeaturesSection() {
                 name: 'Self-Serve Plan', 
                 price: '$39', 
                 period: '/month',
-                desc: 'Perfect for small teams',
-                features: ['Document maintenance', 'Real-time sync', 'Basic support']
+                desc: 'AI agents handle documentation with Human-in-the-Loop (HITL)—you review and approve; no dedicated writer.',
+                features: ['AI agent–driven documentation', 'Human-in-the-Loop (HITL) review and approval', 'Real-time sync', 'Basic support']
               },
               { 
                 name: 'Managed Plan', 
                 price: '$199', 
                 period: '/month',
-                desc: 'Tech Writer Included',
-                features: ['Everything in Self-Serve', 'Dedicated tech writer', 'Priority support']
+                desc: 'A real technical writer owns the process—no AI-only workflow. A dedicated human tech writer creates and maintains your docs.',
+                features: ['Dedicated technical writer (real person)', 'Human-led documentation—not agent-only', 'Everything in Self-Serve', 'Priority support']
               },
               { 
                 name: 'Enterprise', 

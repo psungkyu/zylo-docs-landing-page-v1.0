@@ -218,7 +218,7 @@ export default function HeroSection() {
             {/* Floating metric cards */}
             <div className="absolute -bottom-6 -left-6 px-4 py-3 rounded-lg bg-card border border-blue-500/20 shadow-lg glow-blue animate-pulse-glow">
               <div className="text-sm font-mono text-blue-400">GraphRAG</div>
-              <div className="text-xs text-muted-foreground">Neo4j-Powered</div>
+              <div className="text-xs text-muted-foreground">Graph-Powered</div>
             </div>
 
             <div className="absolute -top-6 -right-6 px-4 py-3 rounded-lg bg-card border border-amber-500/20 shadow-lg glow-amber animate-pulse-glow delay-1000">
