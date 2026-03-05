@@ -233,6 +233,30 @@
     animation: pulse-glow 3s ease-in-out infinite;
   }
 
+  @keyframes graph-flow {
+    to {
+      stroke-dashoffset: -0.15;
+    }
+  }
+
+  .animate-graph-flow {
+    stroke-dasharray: 0.08 0.08;
+    animation: graph-flow 1s linear infinite;
+  }
+
+  @keyframes node-pulse {
+    0%, 100% {
+      opacity: 1;
+    }
+    50% {
+      opacity: 0.65;
+    }
+  }
+
+  .animate-node-pulse {
+    animation: node-pulse 2s ease-in-out infinite;
+  }
+
   .delay-100 {
     animation-delay: 100ms;
   }
@@ -247,5 +271,23 @@
 
   .delay-1000 {
     animation-delay: 1000ms;
+  }
+
+  /* Trust section: DM Serif Display */
+  .font-trust {
+    font-family: "DM Serif Display", ui-serif, Georgia, serif;
+  }
+
+  /* Logo marquee: right to left, slow (content duplicated 4x, so move 25% per cycle) */
+  @keyframes marquee-left {
+    from {
+      transform: translateX(0);
+    }
+    to {
+      transform: translateX(-25%);
+    }
+  }
+  .animate-marquee-left {
+    animation: marquee-left 40s linear infinite;
   }
 }
