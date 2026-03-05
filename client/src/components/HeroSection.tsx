@@ -1,20 +1,25 @@
 import React, { useEffect, useState, useRef } from 'react';
 import { ArrowRight, Zap } from 'lucide-react';
 
-const ROTATING_PHRASES = ['Documentation', 'Product manual'];
-const INITIAL_DURATION_MS = 2200; // 첫 화면에서 "Documentation" 전체를 보여주는 시간
+// 고정 3단계 순서: 0 Living Documentation → 1 Living Product manual → 2 The Lovable of Documentation → 반복
+const STEP_PHRASE: [string, string][] = [
+  ['Living', 'Documentation'],
+  ['Living', 'Product manual'],
+  ['The Lovable of', 'Documentation'],
+];
+const INITIAL_DURATION_MS = 2200;
 const TYPE_DELAY_MS = 80;
-const PAUSE_BEFORE_NEXT_MS = 1200; // 한 문구 타이핑 끝난 후 다음 문구 전 대기
+const PAUSE_BEFORE_NEXT_MS = 1200;
 
 export default function HeroSection() {
   const [scrollY, setScrollY] = useState(0);
-  // 0 = Documentation, 1 = Product manual. 첫 타자 후에는 1 → 0 → 1 → 0 순서로 번갈아감
-  const [phraseIndex, setPhraseIndex] = useState(0);
   const [docPhase, setDocPhase] = useState<'initial' | 'typing'>('initial');
+  const [stepIndex, setStepIndex] = useState(0); // 0, 1, 2 반복
   const [visibleLength, setVisibleLength] = useState(0);
+  const scheduledNextRef = useRef(false);
   const typingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const currentPhrase = ROTATING_PHRASES[phraseIndex];
+  const [headlinePrefix, currentPhrase] = STEP_PHRASE[stepIndex];
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -22,28 +27,34 @@ export default function HeroSection() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // 첫 화면: "Documentation" 전체만 보여준 뒤, 타이핑 단계로 (첫 타자는 Product manual)
+  // 첫 화면: Living Documentation 전체만 보여준 뒤, 다음 단계(1. Product manual)로
   useEffect(() => {
     if (docPhase !== 'initial') return;
     const t = setTimeout(() => {
       setDocPhase('typing');
-      setPhraseIndex(1); // Product manual 먼저
+      setStepIndex(1); // Living Product manual
       setVisibleLength(0);
     }, INITIAL_DURATION_MS);
     return () => clearTimeout(t);
   }, [docPhase]);
 
-  // 타이핑이 끝나면 잠시 대기 후 다음 문구로 (Product manual ↔ Documentation 번갈아)
+  // 타이핑이 끝나면 잠시 대기 후 다음 단계로 (1 → 2 → 0 → 1 → 2 → 0 ...)
   useEffect(() => {
-    if (docPhase !== 'typing' || visibleLength < currentPhrase.length) return;
+    if (docPhase !== 'typing' || visibleLength < currentPhrase.length) {
+      scheduledNextRef.current = false;
+      return;
+    }
+    if (scheduledNextRef.current) return;
+    scheduledNextRef.current = true;
     const t = setTimeout(() => {
-      setPhraseIndex((i) => (i + 1) % ROTATING_PHRASES.length);
+      scheduledNextRef.current = false;
+      setStepIndex((s) => (s + 1) % 3);
       setVisibleLength(0);
     }, PAUSE_BEFORE_NEXT_MS);
     return () => clearTimeout(t);
-  }, [docPhase, visibleLength, currentPhrase.length]);
+  }, [docPhase, visibleLength, currentPhrase.length, stepIndex]);
 
-  // 타이핑 구간: 한 글자씩 추가
+  // 타이핑 구간: 한 글자씩 추가. stepIndex 포함해 단계가 바뀔 때마다(2→0처럼 문구가 같아도) 새로 시작
   useEffect(() => {
     if (docPhase !== 'typing') return;
     typingIntervalRef.current = setInterval(() => {
@@ -64,13 +75,14 @@ export default function HeroSection() {
         typingIntervalRef.current = null;
       }
     };
-  }, [docPhase, currentPhrase]);
+  }, [docPhase, currentPhrase, stepIndex]);
 
   const displayDocText =
     docPhase === 'initial'
       ? 'Documentation'
       : currentPhrase.slice(0, visibleLength);
   const showCursor = docPhase === 'typing' && visibleLength < currentPhrase.length;
+  const displayPrefix = docPhase === 'initial' ? 'Living' : headlinePrefix;
 
   return (
     <section className="relative min-h-screen w-full pt-24 pb-20 overflow-hidden grid-overlay">
@@ -92,7 +104,7 @@ export default function HeroSection() {
 
           {/* Main Headline */}
           <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold font-mono leading-tight mb-6 text-foreground animate-fade-in-up">
-            Living
+            {displayPrefix}
             <br />
             <span className="text-gradient-blue-amber inline-flex items-baseline">
               {displayDocText}
