@@ -5,9 +5,9 @@ export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
 
   const navItems = [
-    { label: 'Solution', href: '#solution' },
-    { label: 'Technology', href: '#technology' },
-    { label: 'Why zylo-docs', href: '#why-zylo-docs' },
+    { label: 'How it works', href: '#solution' },
+    { label: 'Features', href: '#technology' },
+    { label: 'Pricing', href: '#pricing' },
     { label: 'Blog', href: 'https://blog.zylosystems.com/', external: true },
   ];
 
@@ -15,13 +15,13 @@ export default function Navigation() {
     <nav className="fixed top-0 left-0 right-0 z-50 bg-background/80 backdrop-blur-md border-b border-border">
       <div className="container flex items-center justify-between h-16">
         {/* Logo */}
-        <div className="flex items-center">
+        <a href="/" className="flex items-center">
           <img 
             src="/zylo-logo.png" 
             alt="zylo-docs" 
             className="h-12 w-auto"
           />
-        </div>
+        </a>
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-8">
