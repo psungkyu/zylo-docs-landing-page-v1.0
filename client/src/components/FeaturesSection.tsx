@@ -154,6 +154,10 @@ export default function FeaturesSection() {
               </div>
             ))}
           </div>
+
+          <p className="mt-6 text-sm text-muted-foreground text-center max-w-xl mx-auto">
+            Final cost may vary depending on token usage during AI analysis and documentation generation.
+          </p>
         </div>
       </div>
     </section>
