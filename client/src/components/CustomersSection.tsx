@@ -7,7 +7,7 @@ export default function CustomersSection() {
   ];
 
   return (
-    <section className="py-8 lg:py-12 bg-gradient-to-b from-transparent to-blue-500/5">
+    <section className="py-8 lg:py-12 bg-gradient-to-b from-transparent to-blue-500/[0.04]">
       <div className="container">
         <div className="max-w-4xl mx-auto text-center">
           <h2 className="text-lg text-muted-foreground leading-relaxed mb-6">
@@ -25,7 +25,7 @@ export default function CustomersSection() {
                   <img
                     src={customer.logo}
                     alt=""
-                    className="h-8 lg:h-10 w-auto opacity-50 grayscale"
+                    className="h-10 lg:h-12 w-auto opacity-90 min-w-[80px] object-contain"
                   />
                 </div>
               ))}
