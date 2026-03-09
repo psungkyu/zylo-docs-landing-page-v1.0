@@ -1,5 +1,29 @@
 import React, { useEffect, useState, useRef } from 'react';
-import { ArrowRight, Zap } from 'lucide-react';
+import { useAuth, useClerk, useUser, SignOutButton } from '@clerk/react';
+import { ArrowRight, Zap, Link2, Network, LogOut, Loader2 } from 'lucide-react';
+import { toast } from 'sonner';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
+
+const PENDING_GRAPH_URL_KEY = 'pendingGraphUrl';
+
+/** Clerk JWT template name for Zylo Engine Backend (env: VITE_ZYLO_ENGINE_JWT_TEMPLATE) */
+const ZYLO_ENGINE_JWT_TEMPLATE =
+  import.meta.env.VITE_ZYLO_ENGINE_JWT_TEMPLATE ?? 'zylo-engine-backend';
+
+const GRAPH_API_URL = import.meta.env.VITE_GRAPH_API_URL ?? 'http://localhost:8000';
+
+async function callGraphUpsert(url: string, token: string): Promise<Response> {
+  const res = await fetch(`${GRAPH_API_URL}/graph/upsert`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${token}`,
+    },
+    body: JSON.stringify({ url }),
+  });
+  return res;
+}
 
 // 고정 3단계 순서: 0 Living Documentation → 1 Living Product manual → 2 The Lovable of Documentation → 반복
 const STEP_PHRASE: [string, string][] = [
@@ -12,6 +36,9 @@ const TYPE_DELAY_MS = 80;
 const PAUSE_BEFORE_NEXT_MS = 1200;
 
 export default function HeroSection() {
+  const { isSignedIn, isLoaded: authLoaded, getToken } = useAuth();
+  const { user } = useUser();
+  const clerk = useClerk();
   const [scrollY, setScrollY] = useState(0);
   const [docPhase, setDocPhase] = useState<'initial' | 'typing'>('initial');
   const [stepIndex, setStepIndex] = useState(0); // 0, 1, 2 반복
@@ -20,6 +47,75 @@ export default function HeroSection() {
   const typingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const [headlinePrefix, currentPhrase] = STEP_PHRASE[stepIndex];
+  const [graphUrl, setGraphUrl] = useState('');
+  const [graphRequested, setGraphRequested] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+
+  // 로그인 직후 저장해 둔 URL로 바로 분석 트리거 (Zylo Engine용 JWT 발급 후 프로세싱 표시)
+  useEffect(() => {
+    if (!authLoaded || !isSignedIn || !getToken) return;
+    const pending = sessionStorage.getItem(PENDING_GRAPH_URL_KEY);
+    if (!pending) return;
+    sessionStorage.removeItem(PENDING_GRAPH_URL_KEY);
+
+    setIsProcessing(true);
+    (async () => {
+      try {
+        const token = await getToken({ template: ZYLO_ENGINE_JWT_TEMPLATE });
+        if (token) {
+          const res = await callGraphUpsert(pending, token);
+          if (!res.ok) {
+            const errText = await res.text();
+            toast.error(`업서트 실패 (${res.status}): ${errText || res.statusText}`);
+          } else {
+            toast.success('처리가 완료되었습니다.');
+          }
+        }
+      } catch (e) {
+        toast.error(`요청 실패: ${e instanceof Error ? e.message : String(e)}`);
+      } finally {
+        setIsProcessing(false);
+      }
+      setGraphUrl(pending);
+      setGraphRequested(true);
+    })();
+  }, [authLoaded, isSignedIn, getToken]);
+
+  const handleViewClick = () => {
+    const url = graphUrl.trim();
+    if (!url) return;
+
+    // 비로그인: 로그인 유도 후 돌아오면 해당 URL로 분석
+    if (authLoaded && !isSignedIn) {
+      sessionStorage.setItem(PENDING_GRAPH_URL_KEY, url);
+      clerk.openSignIn({});
+      return;
+    }
+
+    // 로그인됐거나 auth 아직 로드 전: 그래프 요청 표시 후, JWT 발급 및 프로세싱 알림
+    setGraphRequested(true);
+    setIsProcessing(true);
+    (async () => {
+      try {
+        const token = getToken
+          ? await getToken({ template: ZYLO_ENGINE_JWT_TEMPLATE })
+          : null;
+        if (token) {
+          const res = await callGraphUpsert(url, token);
+          if (!res.ok) {
+            const errText = await res.text();
+            toast.error(`업서트 실패 (${res.status}): ${errText || res.statusText}`);
+          } else {
+            toast.success('처리가 완료되었습니다.');
+          }
+        }
+      } catch (e) {
+        toast.error(`요청 실패: ${e instanceof Error ? e.message : String(e)}`);
+      } finally {
+        setIsProcessing(false);
+      }
+    })();
+  };
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
@@ -146,96 +242,103 @@ export default function HeroSection() {
           </div>
         </div>
 
-        {/* Right Visual */}
-        <div className="flex-1 relative hidden lg:block w-full">
-          {/* Floating card with parallax */}
+        {/* Right: URL input + Graph (React Flow placeholder) - 모든 breakpoint에서 표시 */}
+        <div className="flex-1 relative w-full lg:max-w-[420px] min-w-0">
           <div
             className="relative"
             style={{
-              transform: `translateY(${scrollY * 0.3}px)`,
+              transform: `translateY(${scrollY * 0.15}px)`,
             }}
           >
-            {/* Animated Knowledge Graph - organic layout, curved edges */}
-            <div className="relative w-full aspect-square rounded-2xl overflow-hidden border border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-amber-500/10 glow-blue">
-              <div className="absolute inset-0 flex items-center justify-center p-6">
-                <svg
-                  viewBox="0 0 280 280"
-                  className="w-full h-full max-w-[320px] max-h-[320px] text-foreground/90"
-                  aria-hidden
-                >
-                  <defs>
-                    <linearGradient id="hero-edge-blue" x1="0%" y1="0%" x2="100%" y2="0%">
-                      <stop offset="0%" stopColor="rgb(59 130 246)" stopOpacity="0.35" />
-                      <stop offset="100%" stopColor="rgb(245 158 11)" stopOpacity="0.35" />
-                    </linearGradient>
-                    <linearGradient id="hero-node-center" x1="0%" y1="0%" x2="100%" y2="100%">
-                      <stop offset="0%" stopColor="rgb(59 130 246)" />
-                      <stop offset="100%" stopColor="rgb(245 158 11)" />
-                    </linearGradient>
-                    <filter id="hero-glow">
-                      <feGaussianBlur stdDeviation="2" result="blur" />
-                      <feMerge>
-                        <feMergeNode in="blur" />
-                        <feMergeNode in="SourceGraphic" />
-                      </feMerge>
-                    </filter>
-                  </defs>
-                  {/* Edges - curved paths (Q = quadratic Bezier), subtle base line */}
-                  <g fill="none" stroke="url(#hero-edge-blue)" strokeWidth="1.2" strokeLinecap="round">
-                    <path d="M 140 140 Q 128 90 132 58" pathLength={1} />
-                    <path d="M 140 140 Q 185 135 218 138" pathLength={1} />
-                    <path d="M 140 140 Q 148 195 142 228" pathLength={1} />
-                    <path d="M 140 140 Q 98 142 58 138" pathLength={1} />
-                    <path d="M 140 140 Q 168 108 192 88" pathLength={1} />
-                    <path d="M 140 140 Q 108 172 88 202" pathLength={1} />
-                    <path d="M 140 140 Q 172 172 200 198" pathLength={1} />
-                    <path d="M 140 140 Q 108 108 82 90" pathLength={1} />
-                    {/* Outer-to-outer for more natural network look */}
-                    <path d="M 132 58 Q 162 72 192 88" pathLength={1} strokeOpacity="0.6" />
-                    <path d="M 88 202 Q 118 218 142 228" pathLength={1} strokeOpacity="0.6" />
-                    <path d="M 58 138 Q 72 168 88 202" pathLength={1} strokeOpacity="0.6" />
-                  </g>
-                  {/* Edges - animated flow (same paths) */}
-                  <g fill="none" stroke="url(#hero-edge-blue)" strokeWidth="1.8" strokeLinecap="round" className="animate-graph-flow">
-                    <path d="M 140 140 Q 128 90 132 58" pathLength={1} />
-                    <path d="M 140 140 Q 185 135 218 138" pathLength={1} style={{ animationDelay: '0.15s' }} />
-                    <path d="M 140 140 Q 148 195 142 228" pathLength={1} style={{ animationDelay: '0.3s' }} />
-                    <path d="M 140 140 Q 98 142 58 138" pathLength={1} style={{ animationDelay: '0.08s' }} />
-                    <path d="M 140 140 Q 168 108 192 88" pathLength={1} style={{ animationDelay: '0.22s' }} />
-                    <path d="M 140 140 Q 108 172 88 202" pathLength={1} style={{ animationDelay: '0.38s' }} />
-                    <path d="M 140 140 Q 172 172 200 198" pathLength={1} style={{ animationDelay: '0.12s' }} />
-                    <path d="M 140 140 Q 108 108 82 90" pathLength={1} style={{ animationDelay: '0.25s' }} />
-                    <path d="M 132 58 Q 162 72 192 88" pathLength={1} style={{ animationDelay: '0.4s' }} strokeOpacity="0.85" />
-                    <path d="M 88 202 Q 118 218 142 228" pathLength={1} style={{ animationDelay: '0.45s' }} strokeOpacity="0.85" />
-                    <path d="M 58 138 Q 72 168 88 202" pathLength={1} style={{ animationDelay: '0.2s' }} strokeOpacity="0.85" />
-                  </g>
-                  {/* Nodes - varied size & position for organic feel */}
-                  <circle cx="132" cy="58" r="5" fill="rgb(59 130 246)" opacity="0.92" className="animate-node-pulse" />
-                  <circle cx="218" cy="138" r="5.5" fill="rgb(59 130 246)" opacity="0.92" className="animate-node-pulse" style={{ animationDelay: '0.15s' }} />
-                  <circle cx="142" cy="228" r="5" fill="rgb(245 158 11)" opacity="0.92" className="animate-node-pulse" style={{ animationDelay: '0.3s' }} />
-                  <circle cx="58" cy="138" r="5.5" fill="rgb(59 130 246)" opacity="0.92" className="animate-node-pulse" style={{ animationDelay: '0.08s' }} />
-                  <circle cx="192" cy="88" r="4.5" fill="rgb(245 158 11)" opacity="0.88" className="animate-node-pulse" style={{ animationDelay: '0.22s' }} />
-                  <circle cx="88" cy="202" r="4.5" fill="rgb(245 158 11)" opacity="0.88" className="animate-node-pulse" style={{ animationDelay: '0.38s' }} />
-                  <circle cx="200" cy="198" r="4" fill="rgb(59 130 246)" opacity="0.88" className="animate-node-pulse" style={{ animationDelay: '0.12s' }} />
-                  <circle cx="82" cy="90" r="4" fill="rgb(59 130 246)" opacity="0.88" className="animate-node-pulse" style={{ animationDelay: '0.25s' }} />
-                  {/* Center node */}
-                  <circle cx="140" cy="140" r="10" fill="url(#hero-node-center)" filter="url(#hero-glow)" className="animate-pulse" />
-                </svg>
+            <div
+              className={`rounded-2xl overflow-hidden border border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-amber-500/10 shadow-xl glow-blue transition-opacity ${isProcessing ? 'pointer-events-none opacity-70' : ''}`}
+            >
+              {/* URL input block */}
+              <div className="p-5 border-b border-blue-500/10">
+                <div className="flex items-center gap-2 mb-3">
+                  <Link2 className="size-4 text-blue-400 shrink-0" />
+                  <span className="text-sm font-medium text-foreground">Explore your docs as a graph</span>
+                </div>
+                {authLoaded && isSignedIn && user && (
+                  <div className="flex items-center justify-between gap-2 mb-3 min-h-[28px]">
+                    <span className="flex items-center gap-2 text-xs text-muted-foreground truncate">
+                      <span className="size-2 rounded-full bg-green-400 shrink-0" aria-hidden />
+                      <span className="truncate">
+                        Signed in as {user.primaryEmailAddress?.emailAddress ?? user.firstName ?? 'Signed in'}
+                      </span>
+                    </span>
+                    <SignOutButton>
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="h-8 px-2 text-xs text-muted-foreground hover:text-foreground shrink-0"
+                      >
+                        <LogOut className="size-3.5 mr-1" />
+                        Sign out
+                      </Button>
+                    </SignOutButton>
+                  </div>
+                )}
+                <div className="flex gap-2">
+                  <Input
+                    type="url"
+                    placeholder="https://docs.example.com"
+                    value={graphUrl}
+                    onChange={(e) => setGraphUrl(e.target.value)}
+                    onKeyDown={(e) => e.key === 'Enter' && handleViewClick()}
+                    disabled={isProcessing}
+                    className="flex-1 h-10 bg-background/80 border-blue-500/20 text-foreground placeholder:text-zinc-500 focus-visible:ring-blue-500/50 focus-visible:border-blue-500/40 disabled:opacity-70"
+                  />
+                  {isProcessing ? (
+                    <div className="h-10 w-10 shrink-0 flex items-center justify-center rounded-lg bg-blue-500/20 border border-blue-500/30">
+                      <Loader2 className="size-5 text-blue-400 animate-spin" aria-hidden />
+                    </div>
+                  ) : (
+                    <Button
+                      type="button"
+                      size="sm"
+                      onClick={handleViewClick}
+                      className="h-10 shrink-0 bg-blue-500 hover:bg-blue-600 text-white border-0 glow-blue"
+                    >
+                      <Network className="size-4 mr-1.5" />
+                      View
+                    </Button>
+                  )}
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">Enter a documentation URL to visualize its structure.</p>
               </div>
-              <p className="absolute bottom-4 left-0 right-0 text-center text-sm text-muted-foreground">AI-Powered Knowledge Graph</p>
-              {/* Decorative grid overlay */}
-              <div className="absolute inset-0 grid-overlay opacity-20 pointer-events-none" />
+
+              {/* Graph area (placeholder for React Flow) */}
+              <div className="aspect-square min-h-[280px] flex items-center justify-center bg-background/40 relative">
+                {graphRequested && graphUrl.trim() ? (
+                  <div className="text-center px-4">
+                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-blue-500/10 border border-blue-500/20 mb-3">
+                      <Network className="size-7 text-blue-400" />
+                    </div>
+                    <p className="text-sm font-medium text-foreground mb-1">Graph view</p>
+                    <p className="text-xs text-muted-foreground max-w-[200px] mx-auto">
+                      React Flow graph will appear here for: <span className="text-blue-400/90 break-all">{graphUrl.trim()}</span>
+                    </p>
+                  </div>
+                ) : (
+                  <div className="text-center px-4">
+                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-blue-500/5 border border-blue-500/10 mb-3">
+                      <Network className="size-7 text-muted-foreground/60" />
+                    </div>
+                    <p className="text-sm text-muted-foreground">Enter a URL and click View</p>
+                    <p className="text-xs text-muted-foreground/80 mt-1">to see the documentation graph</p>
+                  </div>
+                )}
+                <div className="absolute inset-0 grid-overlay opacity-[0.07] pointer-events-none" />
+              </div>
             </div>
 
-            {/* Floating metric cards */}
-            <div className="absolute -bottom-6 -left-6 px-4 py-3 rounded-lg bg-card border border-blue-500/20 shadow-lg glow-blue animate-pulse-glow">
-              <div className="text-sm font-mono text-blue-400">GraphRAG</div>
-              <div className="text-xs text-muted-foreground">Graph-Powered</div>
-            </div>
-
-            <div className="absolute -top-6 -right-6 px-4 py-3 rounded-lg bg-card border border-amber-500/20 shadow-lg glow-amber animate-pulse-glow delay-1000">
-              <div className="text-sm font-mono text-amber-400">Real-Time Sync</div>
-              <div className="text-xs text-muted-foreground">Live Updates</div>
+            {/* Floating hint */}
+            <div className="absolute -bottom-4 left-0 right-0 flex justify-center">
+              <span className="text-xs text-muted-foreground/80 bg-background/60 backdrop-blur-sm px-3 py-1.5 rounded-full border border-blue-500/10">
+                Powered by GraphRAG
+              </span>
             </div>
           </div>
         </div>
