@@ -1,3 +1,8 @@
+/**
+ * 히어로 섹션 (그래프 변환 기능 포함).
+ * 현재 배포는 홀드 상태 → Home에서 HeroSectionFallback 사용 중.
+ * 그래프 재개 시 Home.tsx에서 ClerkProvider + HeroSection 주석 해제.
+ */
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useAuth, useClerk, useUser, SignOutButton } from '@clerk/react';
 import {

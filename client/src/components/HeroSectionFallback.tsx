@@ -1,8 +1,10 @@
 import React from 'react';
 import { ArrowRight, Zap, Link2, Network } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Button } from '@/components/ui/button';
 
 /**
- * 히어로 섹션 (Clerk 없음): 그래프 카드만 플레이스홀더. Vercel 등에서 키가 없을 때 전체 페이지가 보이도록.
+ * 히어로 섹션 껍데기: 그래프 변환 기능 배포 홀드 시 사용. URL 입력 + View + 그래프 영역 UI만 표시 (동작 없음).
  */
 export default function HeroSectionFallback() {
   const [scrollY, setScrollY] = React.useState(0);
@@ -104,21 +106,41 @@ export default function HeroSectionFallback() {
 
         <div className="flex-1 relative w-full lg:max-w-[420px] min-w-0">
           <div className="relative" style={{ transform: `translateY(${scrollY * 0.15}px)` }}>
-            <div className="rounded-2xl overflow-hidden border border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-amber-500/10 shadow-xl glow-blue p-5">
-              <div className="flex items-center gap-2 mb-3">
-                <Link2 className="size-4 text-blue-400 shrink-0" />
-                <span className="text-sm font-medium text-foreground">Explore your docs as a graph</span>
+            <div className="rounded-2xl overflow-hidden border border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-amber-500/10 shadow-xl glow-blue">
+              <div className="p-5 border-b border-blue-500/10">
+                <div className="flex items-center gap-2 mb-3">
+                  <Link2 className="size-4 text-blue-400 shrink-0" />
+                  <span className="text-sm font-medium text-foreground">Explore your docs as a graph</span>
+                </div>
+                <div className="flex gap-2">
+                  <Input
+                    type="url"
+                    placeholder="https://docs.example.com"
+                    disabled
+                    className="flex-1 h-10 bg-background/80 border-blue-500/20 text-muted-foreground placeholder:text-zinc-500"
+                  />
+                  <Button type="button" size="sm" disabled className="h-10 shrink-0 bg-blue-500/50 text-white border-0 cursor-not-allowed">
+                    <Network className="size-4 mr-1.5" />
+                    View
+                  </Button>
+                </div>
+                <p className="mt-2 text-xs text-muted-foreground">Enter a documentation URL to visualize its structure. (Coming soon)</p>
               </div>
-              <p className="text-xs text-muted-foreground mb-4">
-                Sign in with Clerk to visualize documentation as a graph. Set VITE_CLERK_PUBLISHABLE_KEY to enable.
-              </p>
-              <div className="aspect-square min-h-[200px] rounded-xl bg-background/40 border border-blue-500/10 flex items-center justify-center">
-                <div className="text-center px-4">
-                  <Network className="size-10 text-muted-foreground/60 mx-auto mb-2" />
-                  <p className="text-sm text-muted-foreground">Graph preview</p>
+              <div className="aspect-square min-h-[280px] flex items-center justify-center rounded-b-2xl bg-gradient-to-b from-background/50 to-blue-500/5 border-t border-blue-500/10">
+                <div className="text-center px-4 py-8">
+                  <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-500/5 border border-blue-500/10 mb-4">
+                    <Network className="size-7 text-muted-foreground/60" />
+                  </div>
+                  <p className="text-sm text-muted-foreground">Enter a URL and click View</p>
+                  <p className="text-xs text-muted-foreground/80 mt-1">to see the documentation graph</p>
+                  <p className="text-xs text-muted-foreground/60 mt-3">(Graph feature coming soon)</p>
                 </div>
               </div>
-              <p className="text-xs text-muted-foreground/80 mt-3 text-center">Powered by GraphRAG</p>
+              <div className="flex justify-center pb-3">
+                <span className="text-xs text-muted-foreground/80 bg-background/60 backdrop-blur-sm px-3 py-1.5 rounded-full border border-blue-500/10">
+                  Powered by GraphRAG
+                </span>
+              </div>
             </div>
           </div>
         </div>
