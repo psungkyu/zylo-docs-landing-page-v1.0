@@ -26,11 +26,11 @@ function SolutionStep({ number, title, description, image, icon, accent }: StepP
   return (
     <div className="flex flex-col lg:flex-row gap-8 items-center mb-20">
       {number % 2 === 0 && (
-        <div className="flex-1 order-2 lg:order-1 rounded-xl bg-white dark:bg-zinc-700/90 p-4">
+        <div className="flex-1 order-2 lg:order-1 flex justify-center">
           <img
             src={image}
             alt={title}
-            className="w-full rounded-xl border border-blue-500/20 shadow-lg"
+            className="w-full max-w-2xl object-contain"
           />
         </div>
       )}
@@ -106,11 +106,11 @@ function SolutionStep({ number, title, description, image, icon, accent }: StepP
       </div>
 
       {number % 2 === 1 && (
-        <div className="flex-1 rounded-xl bg-white dark:bg-zinc-700/90 p-4">
+        <div className="flex-1 flex justify-center">
           <img
             src={image}
             alt={title}
-            className="w-full rounded-xl border border-blue-500/20 shadow-lg"
+            className="w-full max-w-2xl object-contain"
           />
         </div>
       )}
