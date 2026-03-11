@@ -290,4 +290,65 @@
   .animate-marquee-left {
     animation: marquee-left 40s linear infinite;
   }
+
+  /* Signed-in status: 초록 점 반짝임 */
+  @keyframes status-dot-glow {
+    0%, 100% {
+      opacity: 1;
+      box-shadow: 0 0 0 0 rgba(74, 222, 128, 0.5), 0 0 6px 2px rgba(74, 222, 128, 0.25);
+    }
+    50% {
+      opacity: 0.95;
+      box-shadow: 0 0 0 4px rgba(74, 222, 128, 0.2), 0 0 10px 4px rgba(74, 222, 128, 0.35);
+    }
+  }
+  .animate-status-dot-glow {
+    animation: status-dot-glow 2s ease-in-out infinite;
+  }
+
+  /* React Flow graph theme (zylo landing) */
+  .graph-flow-zylo .react-flow__background {
+    --react-flow-background: rgba(59, 130, 246, 0.04);
+  }
+  .graph-flow-zylo .react-flow__node {
+    border: none;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+  }
+  .graph-flow-zylo .react-flow__node.selected {
+    box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.6);
+    border-radius: 9999px;
+  }
+  .graph-flow-zylo .react-flow__edge-path {
+    stroke: rgba(59, 130, 246, 0.5);
+    stroke-width: 1.5;
+  }
+  .graph-flow-zylo .react-flow__edge.selected .react-flow__edge-path,
+  .graph-flow-zylo .react-flow__edge:hover .react-flow__edge-path {
+    stroke: rgba(59, 130, 246, 0.9);
+  }
+  .graph-flow-zylo .react-flow__controls {
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  }
+  .graph-flow-zylo .react-flow__controls-button {
+    background: var(--card);
+    color: var(--foreground);
+    border-bottom: 1px solid rgba(59, 130, 246, 0.1);
+  }
+  .graph-flow-zylo .react-flow__controls-button:hover {
+    background: rgba(59, 130, 246, 0.1);
+  }
+  .graph-flow-zylo .react-flow__controls-button svg {
+    fill: currentColor;
+  }
+  .graph-flow-zylo .react-flow__minimap {
+    border-radius: var(--radius-md);
+    border: 1px solid rgba(59, 130, 246, 0.2);
+    overflow: hidden;
+  }
 }

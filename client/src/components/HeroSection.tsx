@@ -1,5 +1,24 @@
-import React, { useEffect, useState, useRef } from 'react';
+import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { useAuth, useClerk, useUser, SignOutButton } from '@clerk/react';
+import {
+  ReactFlow,
+  applyNodeChanges,
+  applyEdgeChanges,
+  addEdge,
+  Handle,
+  Position,
+  BaseEdge,
+  getBezierPath,
+  EdgeLabelRenderer,
+  type Node,
+  type Edge,
+  type OnConnect,
+  type OnNodesChange,
+  type OnEdgesChange,
+  type NodeProps,
+  type EdgeProps,
+} from '@xyflow/react';
+import '@xyflow/react/dist/style.css';
 import { ArrowRight, Zap, Link2, Network, LogOut, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import { Input } from '@/components/ui/input';
@@ -24,6 +43,148 @@ async function callGraphUpsert(url: string, token: string): Promise<Response> {
   });
   return res;
 }
+
+async function callGraphFlow(
+  url: string,
+  token: string
+): Promise<{ nodes: Node[]; edges: Edge[] }> {
+  const res = await fetch(
+    `${GRAPH_API_URL}/graph/flow?url=${encodeURIComponent(url)}`,
+    {
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+  if (!res.ok) {
+    const err = await res.text();
+    throw new Error(err || res.statusText);
+  }
+  return res.json();
+}
+
+/** 노드/엣지 라벨에서 "Node :", "Relationship :" 등 접두어 제거 */
+function cleanLabel(raw: string | undefined | null): string {
+  if (raw == null) return '';
+  const s = String(raw).trim();
+  return s.replace(/^(?:Node|Relationship|Edge|Relation)\s*:\s*/i, '').trim() || s;
+}
+
+/** 노드 표시 이름: label이 비거나 'Node' 같은 기본값이면 name/title/url/id 순으로 사용 */
+function getNodeDisplayLabel(data: NodeProps['data'], id: string): string {
+  const raw = data?.label != null ? String(data.label) : '';
+  const cleaned = cleanLabel(raw);
+  if (cleaned && cleaned.toLowerCase() !== 'node') return cleaned;
+  const d = data as Record<string, unknown> | undefined;
+  if (d?.name != null && String(d.name).trim()) return String(d.name).trim();
+  if (d?.title != null && String(d.title).trim()) return String(d.title).trim();
+  if (d?.url != null) {
+    const u = String(d.url);
+    try {
+      const path = new URL(u).pathname;
+      const segment = path.split('/').filter(Boolean).pop();
+      if (segment) return decodeURIComponent(segment);
+    } catch {
+      return u;
+    }
+    return u;
+  }
+  return id;
+}
+
+/** dagre로 계층 레이아웃 적용 (노드 위치만 재계산) */
+async function getLayoutedNodes<N extends Node>(nodes: N[], edges: Edge[]): Promise<N[]> {
+  if (nodes.length === 0) return nodes;
+  const dagre = await import('dagre');
+  const g = new dagre.graphlib.Graph();
+  g.setDefaultEdgeLabel(() => ({}));
+  g.setGraph({ rankdir: 'TB', nodesep: 60, ranksep: 80 });
+
+  const nodeWidth = 72;
+  const nodeHeight = 52;
+  nodes.forEach((n) => g.setNode(n.id, { width: nodeWidth, height: nodeHeight }));
+  edges.forEach((e) => g.setEdge(e.source, e.target));
+
+  dagre.layout(g);
+
+  return nodes.map((n) => {
+    const pos = g.node(n.id);
+    if (!pos) return n;
+    return {
+      ...n,
+      position: { x: pos.x - nodeWidth / 2, y: pos.y - nodeHeight / 2 },
+    };
+  });
+}
+const NODE_COLORS = [
+  'rgb(59, 130, 246)',   // blue-500
+  'rgb(245, 158, 11)',   // amber-500
+  'rgb(34, 197, 94)',    // green-500
+  'rgb(168, 85, 247)',   // violet-500
+  'rgb(236, 72, 153)',   // pink-500
+  'rgb(20, 184, 166)',   // teal-500
+  'rgb(251, 146, 60)',   // orange-400
+  'rgb(99, 102, 241)',   // indigo-500
+];
+
+function hashId(id: string): number {
+  let h = 0;
+  for (let i = 0; i < id.length; i++) h = ((h << 5) - h) + id.charCodeAt(i) | 0;
+  return Math.abs(h);
+}
+
+function CircleNode({ data, id }: NodeProps) {
+  const label = getNodeDisplayLabel(data, id);
+  const color = NODE_COLORS[hashId(label) % NODE_COLORS.length];
+  return (
+    <div className="flex flex-col items-center gap-1.5">
+      <span className="text-[10px] font-medium text-foreground text-center max-w-[100px] truncate px-1" title={label}>
+        {label}
+      </span>
+      <div
+        className="rounded-full border-2 border-white/20 shadow-md shrink-0 w-9 h-9"
+        style={{ backgroundColor: color }}
+      >
+        <Handle type="target" position={Position.Top} className="!w-2 !h-2 !border-2 !border-white !-top-1" />
+        <Handle type="source" position={Position.Bottom} className="!w-2 !h-2 !border-2 !border-white !-bottom-1" />
+      </div>
+    </div>
+  );
+}
+
+function LabeledEdge({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, data }: EdgeProps) {
+  const [edgePath, labelX, labelY] = getBezierPath({
+    sourceX,
+    sourceY,
+    sourcePosition,
+    targetX,
+    targetY,
+    targetPosition,
+  });
+  const rawLabel = data?.label ?? (data as { label?: string })?.label;
+  const label = cleanLabel(rawLabel != null ? String(rawLabel) : '');
+  const edgeData = data as Record<string, unknown> | undefined;
+  const tooltipParts: string[] = [];
+  if (label) tooltipParts.push(label);
+  if (edgeData?.type != null) tooltipParts.push(`Type: ${String(edgeData.type)}`);
+  if (edgeData?.name != null && String(edgeData.name) !== label) tooltipParts.push(String(edgeData.name));
+  const tooltip = tooltipParts.length > 0 ? tooltipParts.join(' · ') : undefined;
+  return (
+    <>
+      <BaseEdge id={id} path={edgePath} />
+      <EdgeLabelRenderer>
+        <div
+          className="nodrag nopan absolute rounded px-1.5 py-0.5 text-[10px] font-medium bg-background/95 border border-blue-500/20 text-foreground shadow-sm min-w-[20px] text-center cursor-default"
+          style={{ transform: `translate(${labelX}px, ${labelY}px) translate(-50%, -50%)` }}
+          title={tooltip}
+        >
+          {label || '—'}
+        </div>
+      </EdgeLabelRenderer>
+    </>
+  );
+}
+
+const nodeTypes = { circleNode: CircleNode };
+const edgeTypes = { labeled: LabeledEdge };
 
 // 고정 3단계 순서: 0 Living Documentation → 1 Living Product manual → 2 The Lovable of Documentation → 반복
 const STEP_PHRASE: [string, string][] = [
@@ -50,6 +211,25 @@ export default function HeroSection() {
   const [graphUrl, setGraphUrl] = useState('');
   const [graphRequested, setGraphRequested] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [flowNodes, setFlowNodes] = useState<Node[]>([]);
+  const [flowEdges, setFlowEdges] = useState<Edge[]>([]);
+  const [flowForUrl, setFlowForUrl] = useState<string | null>(null);
+  const [flowLoading, setFlowLoading] = useState(false);
+
+  const onNodesChange: OnNodesChange = useCallback(
+    (changes) =>
+      setFlowNodes((nds) => applyNodeChanges(changes, nds)),
+    []
+  );
+  const onEdgesChange: OnEdgesChange = useCallback(
+    (changes) =>
+      setFlowEdges((eds) => applyEdgeChanges(changes, eds)),
+    []
+  );
+  const onConnect: OnConnect = useCallback(
+    (params) => setFlowEdges((eds) => addEdge(params, eds)),
+    []
+  );
 
   // 로그인 직후 저장해 둔 URL로 바로 분석 트리거 (Zylo Engine용 JWT 발급 후 프로세싱 표시)
   useEffect(() => {
@@ -59,6 +239,8 @@ export default function HeroSection() {
     sessionStorage.removeItem(PENDING_GRAPH_URL_KEY);
 
     setIsProcessing(true);
+    setFlowForUrl(null);
+    setFlowLoading(false);
     (async () => {
       try {
         const token = await getToken({ template: ZYLO_ENGINE_JWT_TEMPLATE });
@@ -69,6 +251,24 @@ export default function HeroSection() {
             toast.error(`업서트 실패 (${res.status}): ${errText || res.statusText}`);
           } else {
             toast.success('처리가 완료되었습니다.');
+            setFlowLoading(true);
+            try {
+              const flow = await callGraphFlow(pending, token);
+              const nodesWithType = flow.nodes.map((n) => ({ ...n, type: 'circleNode' }));
+              const edgesWithType = flow.edges.map((e) => ({
+                ...e,
+                type: 'labeled',
+                data: { ...e.data, label: (e.data as { label?: string })?.label ?? (e as { label?: string }).label ?? '' },
+              }));
+              const layoutedNodes = await getLayoutedNodes(nodesWithType, edgesWithType);
+              setFlowNodes(layoutedNodes);
+              setFlowEdges(edgesWithType);
+              setFlowForUrl(pending);
+            } catch (e) {
+              toast.error(`그래프 로드 실패: ${e instanceof Error ? e.message : String(e)}`);
+            } finally {
+              setFlowLoading(false);
+            }
           }
         }
       } catch (e) {
@@ -95,6 +295,8 @@ export default function HeroSection() {
     // 로그인됐거나 auth 아직 로드 전: 그래프 요청 표시 후, JWT 발급 및 프로세싱 알림
     setGraphRequested(true);
     setIsProcessing(true);
+    setFlowForUrl(null);
+    setFlowLoading(false);
     (async () => {
       try {
         const token = getToken
@@ -107,6 +309,24 @@ export default function HeroSection() {
             toast.error(`업서트 실패 (${res.status}): ${errText || res.statusText}`);
           } else {
             toast.success('처리가 완료되었습니다.');
+            setFlowLoading(true);
+            try {
+              const flow = await callGraphFlow(url, token);
+              const nodesWithType = flow.nodes.map((n) => ({ ...n, type: 'circleNode' }));
+              const edgesWithType = flow.edges.map((e) => ({
+                ...e,
+                type: 'labeled',
+                data: { ...e.data, label: (e.data as { label?: string })?.label ?? (e as { label?: string }).label ?? '' },
+              }));
+              const layoutedNodes = await getLayoutedNodes(nodesWithType, edgesWithType);
+              setFlowNodes(layoutedNodes);
+              setFlowEdges(edgesWithType);
+              setFlowForUrl(url);
+            } catch (e) {
+              toast.error(`그래프 로드 실패: ${e instanceof Error ? e.message : String(e)}`);
+            } finally {
+              setFlowLoading(false);
+            }
           }
         }
       } catch (e) {
@@ -251,7 +471,7 @@ export default function HeroSection() {
             }}
           >
             <div
-              className={`rounded-2xl overflow-hidden border border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-amber-500/10 shadow-xl glow-blue transition-opacity ${isProcessing ? 'pointer-events-none opacity-70' : ''}`}
+              className={`rounded-2xl overflow-visible border border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-amber-500/10 shadow-xl glow-blue transition-opacity ${isProcessing ? 'pointer-events-none opacity-70' : ''}`}
             >
               {/* URL input block */}
               <div className="p-5 border-b border-blue-500/10">
@@ -260,9 +480,11 @@ export default function HeroSection() {
                   <span className="text-sm font-medium text-foreground">Explore your docs as a graph</span>
                 </div>
                 {authLoaded && isSignedIn && user && (
-                  <div className="flex items-center justify-between gap-2 mb-3 min-h-[28px]">
-                    <span className="flex items-center gap-2 text-xs text-muted-foreground truncate">
-                      <span className="size-2 rounded-full bg-green-400 shrink-0" aria-hidden />
+                  <div className="flex items-center justify-between gap-2 mb-3 min-h-[28px] overflow-visible">
+                    <span className="flex items-center gap-2 text-xs text-muted-foreground min-w-0 overflow-visible">
+                      <span className="shrink-0 overflow-visible p-1.5 -m-1.5" aria-hidden>
+                        <span className="size-2 rounded-full bg-green-400 block animate-status-dot-glow" />
+                      </span>
                       <span className="truncate">
                         Signed in as {user.primaryEmailAddress?.emailAddress ?? user.firstName ?? 'Signed in'}
                       </span>
@@ -309,28 +531,57 @@ export default function HeroSection() {
                 <p className="mt-2 text-xs text-muted-foreground">Enter a documentation URL to visualize its structure.</p>
               </div>
 
-              {/* Graph area (placeholder for React Flow) */}
-              <div className="aspect-square min-h-[280px] flex items-center justify-center bg-background/40 relative">
+              {/* Graph area (React Flow or placeholder) */}
+              <div className="aspect-square min-h-[280px] flex items-center justify-center relative overflow-hidden rounded-b-2xl bg-gradient-to-b from-background/50 to-blue-500/5 border-t border-blue-500/10">
                 {graphRequested && graphUrl.trim() ? (
-                  <div className="text-center px-4">
-                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-blue-500/10 border border-blue-500/20 mb-3">
-                      <Network className="size-7 text-blue-400" />
+                  flowForUrl === graphUrl.trim() &&
+                  (flowNodes.length > 0 || flowEdges.length > 0) ? (
+                    <div className="graph-flow-zylo w-full h-full min-h-[280px] rounded-b-2xl overflow-hidden">
+                      <ReactFlow
+                        nodes={flowNodes}
+                        edges={flowEdges}
+                        onNodesChange={onNodesChange}
+                        onEdgesChange={onEdgesChange}
+                        onConnect={onConnect}
+                        nodeTypes={nodeTypes}
+                        edgeTypes={edgeTypes}
+                        fitView
+                        fitViewOptions={{ padding: 0.2, maxZoom: 1.2 }}
+                        minZoom={0.2}
+                        maxZoom={1.5}
+                        defaultEdgeOptions={{ type: 'labeled' }}
+                        className="!bg-transparent"
+                      />
                     </div>
-                    <p className="text-sm font-medium text-foreground mb-1">Graph view</p>
-                    <p className="text-xs text-muted-foreground max-w-[200px] mx-auto">
-                      React Flow graph will appear here for: <span className="text-blue-400/90 break-all">{graphUrl.trim()}</span>
-                    </p>
-                  </div>
+                  ) : flowLoading ? (
+                    <div className="text-center px-4 py-8">
+                      <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 mb-4">
+                        <Loader2 className="size-7 text-blue-400 animate-spin" />
+                      </div>
+                      <p className="text-sm font-medium text-foreground mb-1">그래프 불러오는 중</p>
+                      <p className="text-xs text-muted-foreground">문서 구조를 분석하고 있어요</p>
+                    </div>
+                  ) : (
+                    <div className="text-center px-4 py-6">
+                      <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 mb-3">
+                        <Network className="size-7 text-blue-400" />
+                      </div>
+                      <p className="text-sm font-medium text-foreground mb-1">Graph view</p>
+                      <p className="text-xs text-muted-foreground max-w-[220px] mx-auto break-all">
+                        {graphUrl.trim()}
+                      </p>
+                    </div>
+                  )
                 ) : (
-                  <div className="text-center px-4">
-                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-xl bg-blue-500/5 border border-blue-500/10 mb-3">
+                  <div className="text-center px-4 py-8">
+                    <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-500/5 border border-blue-500/10 mb-4">
                       <Network className="size-7 text-muted-foreground/60" />
                     </div>
                     <p className="text-sm text-muted-foreground">Enter a URL and click View</p>
                     <p className="text-xs text-muted-foreground/80 mt-1">to see the documentation graph</p>
                   </div>
                 )}
-                <div className="absolute inset-0 grid-overlay opacity-[0.07] pointer-events-none" />
+                <div className="absolute inset-0 grid-overlay opacity-[0.06] pointer-events-none rounded-b-2xl" />
               </div>
             </div>
 

@@ -26,7 +26,7 @@ function SolutionStep({ number, title, description, image, icon, accent }: StepP
   return (
     <div className="flex flex-col lg:flex-row gap-8 items-center mb-20">
       {number % 2 === 0 && (
-        <div className="flex-1 order-2 lg:order-1">
+        <div className="flex-1 order-2 lg:order-1 rounded-xl bg-white dark:bg-zinc-700/90 p-4">
           <img
             src={image}
             alt={title}
@@ -106,7 +106,7 @@ function SolutionStep({ number, title, description, image, icon, accent }: StepP
       </div>
 
       {number % 2 === 1 && (
-        <div className="flex-1">
+        <div className="flex-1 rounded-xl bg-white dark:bg-zinc-700/90 p-4">
           <img
             src={image}
             alt={title}
@@ -125,7 +125,7 @@ export default function SolutionSection() {
       title: 'Connect',
       description:
         'This step brings product data and user activity into your knowledge graph.',
-      image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663133935411/cjL5fR4bHdyG5Ua4ZewFre/xylo_step1_ingest_bc5a369f.png',
+      image: '/howitworks/step-1.png',
       icon: <Database size={24} />,
       accent: 'blue' as const,
     },
@@ -134,7 +134,7 @@ export default function SolutionSection() {
       title: 'Analyze & Sync',
       description:
         'This step turns connected data into usable insights and keeps them in sync.',
-      image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663133935411/cjL5fR4bHdyG5Ua4ZewFre/xylo_step2_sync_a4efc240.png',
+      image: '/howitworks/step-2.png',
       icon: <Zap size={24} />,
       accent: 'amber' as const,
     },
@@ -143,7 +143,7 @@ export default function SolutionSection() {
       title: 'Apply',
       description:
         'This step puts the graph to work in your channels.',
-      image: 'https://d2xsxph8kpxj0f.cloudfront.net/310519663133935411/cjL5fR4bHdyG5Ua4ZewFre/xylo_step3_engage_a82f9f77.png',
+      image: '/howitworks/step-3.png',
       icon: <TrendingUp size={24} />,
       accent: 'green' as const,
     },
