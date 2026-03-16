@@ -1,15 +1,21 @@
 "use client";
 
 import React from 'react';
+import { useRouter } from 'next/navigation';
 import { ArrowRight, Link2, Network, Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { DocScoreModal } from '@/components/DocScoreModal';
 
+interface HeroSectionFallbackProps {
+  /** QR/행사용 URL(/?openDocScore=1) 진입 시 모달을 바로 열기 위해 사용 */
+  defaultOpenDocScore?: boolean;
+}
+
 /**
  * 히어로 섹션 껍데기: 그래프 변환 기능 배포 홀드 시 사용. URL 입력 + View + 그래프 영역 UI만 표시 (동작 없음).
  */
-export default function HeroSectionFallback() {
+export default function HeroSectionFallback({ defaultOpenDocScore }: HeroSectionFallbackProps) {
   const [scrollY, setScrollY] = React.useState(0);
   const [docPhase, setDocPhase] = React.useState<'initial' | 'typing'>('initial');
   const [stepIndex, setStepIndex] = React.useState(0);
@@ -20,7 +26,17 @@ export default function HeroSectionFallback() {
     ['The Lovable of', 'Documentation'],
   ];
   const [headlinePrefix, currentPhrase] = stepPhrase[stepIndex];
-  const [docScoreOpen, setDocScoreOpen] = React.useState(false);
+  const [docScoreOpen, setDocScoreOpen] = React.useState(!!defaultOpenDocScore);
+  const router = useRouter();
+
+  // QR/행사 URL(/?openDocScore=1) 진입 시 모달만 열고 주소창은 깔끔하게 / 로 유지
+  React.useEffect(() => {
+    if (!defaultOpenDocScore) return;
+    setDocScoreOpen(true);
+    if (typeof window !== 'undefined' && window.location.search) {
+      router.replace('/', { scroll: false });
+    }
+  }, [defaultOpenDocScore, router]);
 
   React.useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
