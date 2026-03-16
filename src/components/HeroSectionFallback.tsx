@@ -1,7 +1,7 @@
 "use client";
 
 import React from 'react';
-import { ArrowRight, Zap, Link2, Network, Sparkles } from 'lucide-react';
+import { ArrowRight, Link2, Network, Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { DocScoreModal } from '@/components/DocScoreModal';
@@ -68,17 +68,14 @@ export default function HeroSectionFallback() {
       <div className="container relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12 min-h-[calc(100vh-120px)]">
         <div className="flex-1 max-w-2xl w-full">
           <div className="flex flex-wrap items-center gap-2 mb-6">
-            <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20">
-              <Zap size={16} className="text-blue-400" />
-              <span className="text-sm font-medium text-blue-300">AI-Powered Documentation</span>
-            </div>
             <button
               type="button"
               onClick={() => setDocScoreOpen(true)}
-              className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-amber-500/10 border border-amber-500/20 hover:bg-amber-500/20 hover:border-amber-500/40 transition-colors text-amber-200/90 text-sm font-medium"
+              className="group relative inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-full bg-gradient-to-r from-amber-500/20 via-amber-400/15 to-amber-500/20 border border-amber-400/40 hover:border-amber-400/60 transition-all duration-300 text-amber-200 font-medium text-sm overflow-hidden shadow-[0_0_20px_rgba(245,158,11,0.15)] hover:shadow-[0_0_28px_rgba(245,158,11,0.25)]"
             >
-              <Sparkles size={14} className="text-amber-400" />
-              Documentation Scoring (beta)
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-400/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" aria-hidden />
+              <Sparkles size={15} className="text-amber-300 shrink-0 group-hover:scale-110 transition-transform" />
+              <span className="relative">What’s your doc score? (beta)</span>
             </button>
           </div>
           <DocScoreModal open={docScoreOpen} onOpenChange={setDocScoreOpen} />
@@ -139,7 +136,7 @@ export default function HeroSectionFallback() {
                     View
                   </Button>
                 </div>
-                <p className="mt-2 text-xs text-muted-foreground">Graph view coming soon. Try documentation scoring:</p>
+                <p className="mt-2 text-xs text-muted-foreground">Graph view coming soon. What’s your doc score?</p>
                 <Button
                   type="button"
                   variant="outline"

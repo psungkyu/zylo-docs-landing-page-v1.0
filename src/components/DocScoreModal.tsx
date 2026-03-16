@@ -145,7 +145,7 @@ export function DocScoreModal({ open, onOpenChange }: DocScoreModalProps) {
             <span className="inline-flex h-7 w-7 items-center justify-center rounded-md bg-blue-500/10 border border-blue-500/40">
               <Sparkles className="h-4 w-4 text-blue-400" />
             </span>
-            <span>Documentation Scoring (beta)</span>
+            <span>What’s your doc score? (beta)</span>
           </AlertDialogTitle>
           <AlertDialogDescription>
             Submit a public technical documentation URL. We&apos;ll crawl up to 10 pages, extract rule-based signals,
