@@ -12,7 +12,8 @@ import {
 } from "@/components/ui/alert-dialog";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Loader2, Sparkles, X } from "lucide-react";
+import { Loader2, Sparkles, X, Link2 } from "lucide-react";
+import { toast } from "sonner";
 
 interface DocScoreModalProps {
   open: boolean;
@@ -262,6 +263,24 @@ export function DocScoreModal({ open, onOpenChange }: DocScoreModalProps) {
                     ))}
                   </ul>
                 </div>
+              )}
+              {evaluationId && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="w-full mt-2 text-xs"
+                  onClick={() => {
+                    const shareUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/score/${evaluationId}`;
+                    navigator.clipboard.writeText(shareUrl).then(
+                      () => toast.success("Share link copied"),
+                      () => toast.error("Failed to copy")
+                    );
+                  }}
+                >
+                  <Link2 className="h-3.5 w-3.5 mr-2" />
+                  Copy share link
+                </Button>
               )}
             </div>
           )}
