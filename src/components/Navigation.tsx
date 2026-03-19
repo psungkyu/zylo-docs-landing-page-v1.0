@@ -30,7 +30,7 @@ export default function Navigation() {
             className="hidden md:inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-500/30 hover:bg-amber-500/40 text-amber-100 text-xs font-medium transition-colors"
           >
             <Sparkles size={12} />
-            Get your docs score now!
+            Get your docs score now! &gt;
           </a>
         </div>
 
@@ -64,6 +64,19 @@ export default function Navigation() {
         </button>
       </div>
 
+      {/* Mobile Doc Score Banner (outside menu) */}
+      <div className="md:hidden border-t border-border/70 bg-background/90">
+        <div className="container pt-1 pb-3">
+          <a
+            href="/?openDocScore=1"
+            className="w-full inline-flex items-center justify-center gap-1.5 px-2.5 py-1.5 rounded-full bg-amber-500/30 hover:bg-amber-500/40 text-amber-100 text-[11px] font-medium transition-colors"
+          >
+            <Sparkles size={12} />
+            Get your docs score now! &gt;
+          </a>
+        </div>
+      </div>
+
       {/* Mobile Navigation */}
       {isOpen && (
         <div className="md:hidden border-t border-border bg-background">
@@ -79,14 +92,6 @@ export default function Navigation() {
                 {item.label}
               </a>
             ))}
-            <a
-              href="/?openDocScore=1"
-              className="w-full inline-flex items-center justify-center gap-1.5 px-6 py-2 rounded-lg border border-amber-400/40 bg-amber-500/10 hover:bg-amber-500/20 text-amber-200 font-medium text-sm transition-colors"
-              onClick={() => setIsOpen(false)}
-            >
-              <Sparkles size={14} />
-              Get your docs score now!
-            </a>
             <a href="https://tally.so/r/wgBlOO" target="_blank" rel="noopener noreferrer" className="w-full px-6 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-medium text-sm transition-colors glow-blue text-center">
               Get Started
             </a>

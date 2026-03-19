@@ -88,7 +88,7 @@ export default function HeroSectionFallback({ defaultOpenDocScore }: HeroSection
   };
 
   return (
-    <section className="relative min-h-screen w-full pt-24 pb-20 overflow-hidden grid-overlay">
+    <section className="relative min-h-screen w-full pt-32 md:pt-24 pb-20 overflow-hidden grid-overlay">
       <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-amber-500/5 pointer-events-none" />
       <div className="absolute top-20 right-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
       <div className="absolute bottom-20 left-10 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl animate-pulse delay-1000" />
