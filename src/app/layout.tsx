@@ -7,9 +7,7 @@ import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ConvexClientProvider } from "@/app/ConvexClientProvider";
 import "@/app/globals.css";
 
-const siteUrl =
-  process.env.NEXT_PUBLIC_APP_URL ||
-  (process.env.VERCEL_URL ? `https://${process.env.VERCEL_URL}` : "https://zylo-docs.dev");
+const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.zylo-docs.dev";
 
 export const metadata: Metadata = {
   metadataBase: new URL(siteUrl),
