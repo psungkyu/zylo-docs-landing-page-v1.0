@@ -17,14 +17,14 @@ export const metadata: Metadata = {
     title: "Zylosystems | Living Documentation Platform",
     description:
       "Keeping your docs in sync with AI. zylo-docs syncs your documentation automatically so you can focus on building.",
-    images: ["/zylo-logo.png"],
+    images: ["/or-bg-img-final.jpg"],
   },
   twitter: {
     card: "summary_large_image",
     title: "Zylosystems | Living Documentation Platform",
     description:
       "Keeping your docs in sync with AI. zylo-docs syncs your documentation automatically so you can focus on building.",
-    images: ["/zylo-logo.png"],
+    images: ["/or-bg-img-final.jpg"],
   },
 };
 
