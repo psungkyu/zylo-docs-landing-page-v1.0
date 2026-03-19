@@ -4,6 +4,7 @@ import SolutionSection from "@/components/SolutionSection";
 import FeaturesSection from "@/components/FeaturesSection";
 import CustomersSection from "@/components/CustomersSection";
 import CTASection from "@/components/CTASection";
+import ZyloFloatingStatusWidget from "@/components/ZyloFloatingStatusWidget";
 
 export default async function Home({
   searchParams,
@@ -24,6 +25,7 @@ export default async function Home({
         <FeaturesSection />
         <CTASection />
       </main>
+      <ZyloFloatingStatusWidget />
     </div>
   );
 }

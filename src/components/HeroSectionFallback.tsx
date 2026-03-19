@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { useRouter } from 'next/navigation';
-import { ArrowRight, Link2, Network, Sparkles } from 'lucide-react';
+import { ArrowRight, Check, Copy, Link2, Network, Sparkles } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { DocScoreModal } from '@/components/DocScoreModal';
@@ -27,6 +27,7 @@ export default function HeroSectionFallback({ defaultOpenDocScore }: HeroSection
   ];
   const [headlinePrefix, currentPhrase] = stepPhrase[stepIndex];
   const [docScoreOpen, setDocScoreOpen] = React.useState(!!defaultOpenDocScore);
+  const [copiedInstallCmd, setCopiedInstallCmd] = React.useState(false);
   const router = useRouter();
 
   // QR/행사 URL(/?openDocScore=1) 진입 시 모달만 열고 주소창은 깔끔하게 / 로 유지
@@ -74,25 +75,40 @@ export default function HeroSectionFallback({ defaultOpenDocScore }: HeroSection
   const displayDocText = docPhase === 'initial' ? 'Documentation' : currentPhrase.slice(0, visibleLength);
   const showCursor = docPhase === 'typing' && visibleLength < currentPhrase.length;
   const displayPrefix = docPhase === 'initial' ? 'Living' : headlinePrefix;
+  const installCommand = 'npm i @zylosystems/zylo-floating-widget';
+
+  const handleCopyInstallCommand = async () => {
+    try {
+      await navigator.clipboard.writeText(installCommand);
+      setCopiedInstallCmd(true);
+      window.setTimeout(() => setCopiedInstallCmd(false), 1600);
+    } catch {
+      setCopiedInstallCmd(false);
+    }
+  };
 
   return (
     <section className="relative min-h-screen w-full pt-24 pb-20 overflow-hidden grid-overlay">
       <div className="absolute inset-0 bg-gradient-to-br from-blue-500/5 via-transparent to-amber-500/5 pointer-events-none" />
       <div className="absolute top-20 right-10 w-72 h-72 bg-blue-500/10 rounded-full blur-3xl animate-pulse" />
       <div className="absolute bottom-20 left-10 w-96 h-96 bg-amber-500/5 rounded-full blur-3xl animate-pulse delay-1000" />
-
       <div className="container relative z-10 flex flex-col lg:flex-row items-center justify-between gap-12 min-h-[calc(100vh-120px)]">
         <div className="flex-1 max-w-2xl w-full">
-          <div className="flex flex-wrap items-center gap-2 mb-6">
-            <button
-              type="button"
-              onClick={() => setDocScoreOpen(true)}
-              className="group relative inline-flex items-center gap-2 px-4 sm:px-5 py-2.5 rounded-full bg-gradient-to-r from-amber-500/20 via-amber-400/15 to-amber-500/20 border border-amber-400/40 hover:border-amber-400/60 transition-all duration-300 text-amber-200 font-medium text-sm overflow-hidden shadow-[0_0_20px_rgba(245,158,11,0.15)] hover:shadow-[0_0_28px_rgba(245,158,11,0.25)]"
-            >
-              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-amber-400/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" aria-hidden />
-              <Sparkles size={15} className="text-amber-300 shrink-0 group-hover:scale-110 transition-transform" />
-              <span className="relative">What’s your doc score? (beta)</span>
-            </button>
+          <div className="mb-6 w-full max-w-[640px]">
+            <div className="flex items-center justify-between gap-2 rounded-xl border border-blue-500/30 bg-background/85 backdrop-blur-md px-3 py-2 shadow-[0_0_30px_rgba(59,130,246,0.15)]">
+              <code className="text-[11px] sm:text-sm font-mono text-blue-100/95 truncate">
+                {installCommand}
+              </code>
+              <button
+                type="button"
+                onClick={handleCopyInstallCommand}
+                className="inline-flex h-9 w-9 shrink-0 items-center justify-center rounded-md border border-blue-500/30 bg-blue-500/10 hover:bg-blue-500/20 text-blue-200 transition-colors"
+                aria-label="Copy install command"
+                title="Copy install command"
+              >
+                {copiedInstallCmd ? <Check className="size-4 text-emerald-300" /> : <Copy className="size-4" />}
+              </button>
+            </div>
           </div>
           <DocScoreModal open={docScoreOpen} onOpenChange={setDocScoreOpen} />
           <h1 className="text-4xl sm:text-5xl lg:text-7xl font-bold font-mono leading-tight mb-6 text-foreground animate-fade-in-up">
@@ -152,7 +168,7 @@ export default function HeroSectionFallback({ defaultOpenDocScore }: HeroSection
                     View
                   </Button>
                 </div>
-                <p className="mt-2 text-xs text-muted-foreground">Graph view coming soon. What’s your doc score?</p>
+                <p className="mt-2 text-xs text-muted-foreground">Graph view coming soon. Get your doc score.</p>
                 <Button
                   type="button"
                   variant="outline"
