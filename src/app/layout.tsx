@@ -17,24 +17,18 @@ export const metadata: Metadata = {
   openGraph: {
     type: "website",
     url: "/",
+    siteName: "zylo-docs",
     title: "Zylosystems | Living Documentation Platform",
     description:
       "Keeping your docs in sync with AI. zylo-docs syncs your documentation automatically so you can focus on building.",
-    images: [
-      {
-        url: "/or-bg-img-final.jpg",
-        width: 1200,
-        height: 630,
-        alt: "Zylosystems - Living Documentation Platform",
-      },
-    ],
+    // OG 이미지: `opengraph-image.jpg` (App Router 파일 규칙) — 크롤러 호환성이 가장 좋음
   },
   twitter: {
     card: "summary_large_image",
     title: "Zylosystems | Living Documentation Platform",
     description:
       "Keeping your docs in sync with AI. zylo-docs syncs your documentation automatically so you can focus on building.",
-    images: ["/or-bg-img-final.jpg"],
+    // 트위터 카드: `twitter-image.jpg` 파일 규칙
   },
 };
 
