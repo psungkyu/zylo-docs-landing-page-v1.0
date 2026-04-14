@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useParams } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Sparkles, Home, ExternalLink } from "lucide-react";
+import posthog from "posthog-js";
 
 interface EvaluationDoc {
   _id: string;
@@ -37,16 +38,26 @@ export default function ScorePage() {
 
     let cancelled = false;
     fetch(`/api/evaluations/${id}`)
-      .then((res) => {
+      .then(res => {
         if (res.status === 404) {
           setNotFound(true);
           return null;
         }
         return res.json();
       })
-      .then((json) => {
+      .then(json => {
         if (cancelled) return;
         setData(json);
+        if (json?.status === "completed" && json?.result) {
+          posthog.capture("doc_score_share_page_viewed", {
+            evaluation_id: id,
+            overall_score: json.result.overallScore,
+            ai_visibility_score: json.result.aiVisibilityScore,
+            implementation_accuracy_score:
+              json.result.implementationAccuracyScore,
+            docs_url: json.url,
+          });
+        }
       })
       .catch(() => {
         if (!cancelled) setNotFound(true);
@@ -75,7 +86,9 @@ export default function ScorePage() {
     return (
       <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4">
         <div className="text-center max-w-md">
-          <p className="text-muted-foreground mb-6">This score link doesn’t exist or has expired.</p>
+          <p className="text-muted-foreground mb-6">
+            This score link doesn’t exist or has expired.
+          </p>
           <Button asChild>
             <Link href="/">
               <Home className="h-4 w-4 mr-2" />
@@ -93,7 +106,9 @@ export default function ScorePage() {
       <div className="min-h-screen bg-background text-foreground flex items-center justify-center p-4">
         <div className="text-center max-w-md">
           <p className="text-muted-foreground mb-6">
-            {data.status === "failed" ? data.error ?? "Analysis failed." : "This evaluation isn’t complete yet."}
+            {data.status === "failed"
+              ? (data.error ?? "Analysis failed.")
+              : "This evaluation isn’t complete yet."}
           </p>
           <Button asChild>
             <Link href="/">
@@ -120,7 +135,10 @@ export default function ScorePage() {
         </div>
 
         {data.url && (
-          <p className="text-sm text-muted-foreground mb-4 truncate" title={data.url}>
+          <p
+            className="text-sm text-muted-foreground mb-4 truncate"
+            title={data.url}
+          >
             <ExternalLink className="inline h-3.5 w-3.5 mr-1 align-middle" />
             {data.url}
           </p>
@@ -133,7 +151,9 @@ export default function ScorePage() {
             </span>
             <span className="text-2xl font-bold text-foreground">
               {result.overallScore}
-              <span className="text-sm font-normal text-muted-foreground ml-1">/ 100</span>
+              <span className="text-sm font-normal text-muted-foreground ml-1">
+                / 100
+              </span>
             </span>
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -160,7 +180,7 @@ export default function ScorePage() {
                 Strengths
               </div>
               <ul className="list-disc list-inside space-y-1 text-sm text-muted-foreground">
-                {result.strengths.slice(0, 6).map((s) => (
+                {result.strengths.slice(0, 6).map(s => (
                   <li key={s}>{s}</li>
                 ))}
               </ul>

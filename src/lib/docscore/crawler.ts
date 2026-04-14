@@ -35,7 +35,7 @@ export async function crawlDocs(
 
   while (queue.length > 0 && result.length < maxPages) {
     const { url, depth } = queue.shift()!;
-    const norm = url.replace(/#.*$/, "").replace(/\?.*$/, (q) => (q ? "?" : ""));
+    const norm = url.replace(/#.*$/, "").replace(/\?.*$/, q => (q ? "?" : ""));
     if (seen.has(norm) || depth > maxDepth) continue;
     seen.add(norm);
 

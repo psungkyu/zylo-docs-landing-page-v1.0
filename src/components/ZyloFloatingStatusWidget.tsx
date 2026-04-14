@@ -8,5 +8,8 @@ export default function ZyloFloatingStatusWidget() {
     defineZyloFloatingWidget();
   }, []);
 
-  return createElement("zylo-floating-widget", { status: "green" });
+  return createElement("zylo-floating-widget", {
+    status: "green",
+    "api-key": process.env.NEXT_PUBLIC_ZYLO_DOCS_API_KEY,
+  });
 }

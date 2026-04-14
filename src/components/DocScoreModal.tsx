@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Loader2, Sparkles, X, Link2 } from "lucide-react";
 import { toast } from "sonner";
+import posthog from "posthog-js";
 
 interface DocScoreModalProps {
   open: boolean;
@@ -78,7 +79,23 @@ export function DocScoreModal({ open, onOpenChange }: DocScoreModalProps) {
         }
         setStatus(data);
         if (data.status === "completed" || data.status === "failed") {
-          if (data.status === "failed") setError(data.error || "Analysis failed");
+          if (data.status === "completed" && data.result) {
+            posthog.capture("doc_score_completed", {
+              evaluation_id: evaluationId,
+              overall_score: data.result.overallScore,
+              ai_visibility_score: data.result.aiVisibilityScore,
+              implementation_accuracy_score:
+                data.result.implementationAccuracyScore,
+              docs_url: data.url,
+            });
+          } else if (data.status === "failed") {
+            setError(data.error || "Analysis failed");
+            posthog.capture("doc_score_failed", {
+              evaluation_id: evaluationId,
+              error: data.error || "Analysis failed",
+              docs_url: data.url,
+            });
+          }
           if (pollRef.current) {
             clearInterval(pollRef.current);
             pollRef.current = null;
@@ -115,6 +132,8 @@ export function DocScoreModal({ open, onOpenChange }: DocScoreModalProps) {
     setStatus(null);
     setEvaluationId(null);
 
+    posthog.capture("doc_score_submitted", { docs_url: trimmed });
+
     try {
       const res = await fetch("/api/evaluations", {
         method: "POST",
@@ -124,7 +143,9 @@ export function DocScoreModal({ open, onOpenChange }: DocScoreModalProps) {
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        throw new Error((data?.error) || res.statusText || "Failed to start analysis");
+        throw new Error(
+          data?.error || res.statusText || "Failed to start analysis"
+        );
       }
 
       setEvaluationId(data.evaluationId);
@@ -149,9 +170,14 @@ export function DocScoreModal({ open, onOpenChange }: DocScoreModalProps) {
             <span>Get your docs score now!</span>
           </AlertDialogTitle>
           <AlertDialogDescription>
-            Submit a public technical documentation URL. We&apos;ll crawl up to 10 pages, extract rule-based signals,
-            and compute two scores: <span className="font-medium text-foreground">AI Visibility</span> and{" "}
-            <span className="font-medium text-foreground">Implementation Accuracy</span>.
+            Submit a public technical documentation URL. We&apos;ll crawl up to
+            10 pages, extract rule-based signals, and compute two scores:{" "}
+            <span className="font-medium text-foreground">AI Visibility</span>{" "}
+            and{" "}
+            <span className="font-medium text-foreground">
+              Implementation Accuracy
+            </span>
+            .
           </AlertDialogDescription>
           <AlertDialogCancel
             type="button"
@@ -170,7 +196,7 @@ export function DocScoreModal({ open, onOpenChange }: DocScoreModalProps) {
               type="url"
               placeholder="https://docs.example.com"
               value={url}
-              onChange={(e) => setUrl(e.target.value)}
+              onChange={e => setUrl(e.target.value)}
               disabled={isSubmitting}
               className="text-sm"
             />
@@ -205,7 +231,9 @@ export function DocScoreModal({ open, onOpenChange }: DocScoreModalProps) {
                   style={{ width: `${currentProgress}%` }}
                 />
               </div>
-              <span className="text-[10px] text-muted-foreground">{currentProgress}%</span>
+              <span className="text-[10px] text-muted-foreground">
+                {currentProgress}%
+              </span>
             </div>
           </div>
 
@@ -219,7 +247,9 @@ export function DocScoreModal({ open, onOpenChange }: DocScoreModalProps) {
                 </span>
                 <span className="text-sm font-semibold text-foreground">
                   {result.overallScore}
-                  <span className="text-[11px] text-muted-foreground ml-1">/ 100</span>
+                  <span className="text-[11px] text-muted-foreground ml-1">
+                    / 100
+                  </span>
                 </span>
               </div>
               <div className="grid grid-cols-2 gap-2">
@@ -246,7 +276,7 @@ export function DocScoreModal({ open, onOpenChange }: DocScoreModalProps) {
                     Strengths
                   </div>
                   <ul className="list-disc list-inside space-y-0.5 text-[11px] text-muted-foreground max-h-20 overflow-auto">
-                    {result.strengths.slice(0, 5).map((s) => (
+                    {result.strengths.slice(0, 5).map(s => (
                       <li key={s}>{s}</li>
                     ))}
                   </ul>
@@ -273,7 +303,13 @@ export function DocScoreModal({ open, onOpenChange }: DocScoreModalProps) {
                   onClick={() => {
                     const shareUrl = `${typeof window !== "undefined" ? window.location.origin : ""}/score/${evaluationId}`;
                     navigator.clipboard.writeText(shareUrl).then(
-                      () => toast.success("Share link copied"),
+                      () => {
+                        toast.success("Share link copied");
+                        posthog.capture("doc_score_share_link_copied", {
+                          evaluation_id: evaluationId,
+                          overall_score: result?.overallScore,
+                        });
+                      },
                       () => toast.error("Failed to copy")
                     );
                   }}

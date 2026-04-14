@@ -1,9 +1,9 @@
-import React from 'react';
+import React from "react";
 
 export default function CustomersSection() {
   const customers = [
-    { name: 'Notifly', logo: '/customers/notifly-logo.svg' },
-    { name: 'Pikurate', logo: '/customers/pikurate-logo-hover.svg' },
+    { name: "Notifly", logo: "/customers/notifly-logo.svg" },
+    { name: "Pikurate", logo: "/customers/pikurate-logo-hover.svg" },
   ];
 
   return (
@@ -17,18 +17,20 @@ export default function CustomersSection() {
           {/* Single row marquee: right → left, one flowing line on all viewports */}
           <div className="w-full overflow-hidden">
             <div className="flex animate-marquee-left w-max gap-4 lg:gap-8">
-              {[...customers, ...customers, ...customers, ...customers].map((customer, index) => (
-                <div
-                  key={`${customer.name}-${index}`}
-                  className="flex items-center justify-center shrink-0 px-8 lg:px-12"
-                >
-                  <img
-                    src={customer.logo}
-                    alt=""
-                    className="h-10 lg:h-12 w-auto opacity-90 min-w-[80px] object-contain"
-                  />
-                </div>
-              ))}
+              {[...customers, ...customers, ...customers, ...customers].map(
+                (customer, index) => (
+                  <div
+                    key={`${customer.name}-${index}`}
+                    className="flex items-center justify-center shrink-0 px-8 lg:px-12"
+                  >
+                    <img
+                      src={customer.logo}
+                      alt=""
+                      className="h-10 lg:h-12 w-auto opacity-90 min-w-[80px] object-contain"
+                    />
+                  </div>
+                )
+              )}
             </div>
           </div>
         </div>

@@ -3,8 +3,8 @@
  * 현재 배포는 홀드 상태 → Home에서 HeroSectionFallback 사용 중.
  * 그래프 재개 시 Home.tsx에서 ClerkProvider + HeroSection 주석 해제.
  */
-import React, { useEffect, useState, useRef, useCallback } from 'react';
-import { useAuth, useClerk, useUser, SignOutButton } from '@clerk/react';
+import React, { useEffect, useState, useRef, useCallback } from "react";
+import { useAuth, useClerk, useUser, SignOutButton } from "@clerk/react";
 import {
   ReactFlow,
   applyNodeChanges,
@@ -22,26 +22,27 @@ import {
   type OnEdgesChange,
   type NodeProps,
   type EdgeProps,
-} from '@xyflow/react';
-import '@xyflow/react/dist/style.css';
-import { ArrowRight, Zap, Link2, Network, LogOut, Loader2 } from 'lucide-react';
-import { toast } from 'sonner';
-import { Input } from '@/components/ui/input';
-import { Button } from '@/components/ui/button';
+} from "@xyflow/react";
+import "@xyflow/react/dist/style.css";
+import { ArrowRight, Zap, Link2, Network, LogOut, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 
-const PENDING_GRAPH_URL_KEY = 'pendingGraphUrl';
+const PENDING_GRAPH_URL_KEY = "pendingGraphUrl";
 
 /** Clerk JWT template name for Zylo Engine Backend (env: VITE_ZYLO_ENGINE_JWT_TEMPLATE) */
 const ZYLO_ENGINE_JWT_TEMPLATE =
-  process.env.NEXT_PUBLIC_ZYLO_ENGINE_JWT_TEMPLATE ?? 'zylo-engine-backend';
+  process.env.NEXT_PUBLIC_ZYLO_ENGINE_JWT_TEMPLATE ?? "zylo-engine-backend";
 
-const GRAPH_API_URL = process.env.NEXT_PUBLIC_GRAPH_API_URL ?? 'http://localhost:8000';
+const GRAPH_API_URL =
+  process.env.NEXT_PUBLIC_GRAPH_API_URL ?? "http://localhost:8000";
 
 async function callGraphUpsert(url: string, token: string): Promise<Response> {
   const res = await fetch(`${GRAPH_API_URL}/graph/upsert`, {
-    method: 'POST',
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       Authorization: `Bearer ${token}`,
     },
     body: JSON.stringify({ url }),
@@ -68,16 +69,18 @@ async function callGraphFlow(
 
 /** 노드/엣지 라벨에서 "Node :", "Relationship :" 등 접두어 제거 */
 function cleanLabel(raw: string | undefined | null): string {
-  if (raw == null) return '';
+  if (raw == null) return "";
   const s = String(raw).trim();
-  return s.replace(/^(?:Node|Relationship|Edge|Relation)\s*:\s*/i, '').trim() || s;
+  return (
+    s.replace(/^(?:Node|Relationship|Edge|Relation)\s*:\s*/i, "").trim() || s
+  );
 }
 
 /** 노드 표시 이름: label이 비거나 'Node' 같은 기본값이면 name/title/url/id 순으로 사용 */
-function getNodeDisplayLabel(data: NodeProps['data'], id: string): string {
-  const raw = data?.label != null ? String(data.label) : '';
+function getNodeDisplayLabel(data: NodeProps["data"], id: string): string {
+  const raw = data?.label != null ? String(data.label) : "";
   const cleaned = cleanLabel(raw);
-  if (cleaned && cleaned.toLowerCase() !== 'node') return cleaned;
+  if (cleaned && cleaned.toLowerCase() !== "node") return cleaned;
   const d = data as Record<string, unknown> | undefined;
   if (d?.name != null && String(d.name).trim()) return String(d.name).trim();
   if (d?.title != null && String(d.title).trim()) return String(d.title).trim();
@@ -85,7 +88,7 @@ function getNodeDisplayLabel(data: NodeProps['data'], id: string): string {
     const u = String(d.url);
     try {
       const path = new URL(u).pathname;
-      const segment = path.split('/').filter(Boolean).pop();
+      const segment = path.split("/").filter(Boolean).pop();
       if (segment) return decodeURIComponent(segment);
     } catch {
       return u;
@@ -96,21 +99,24 @@ function getNodeDisplayLabel(data: NodeProps['data'], id: string): string {
 }
 
 /** dagre로 계층 레이아웃 적용 (노드 위치만 재계산) */
-async function getLayoutedNodes<N extends Node>(nodes: N[], edges: Edge[]): Promise<N[]> {
+async function getLayoutedNodes<N extends Node>(
+  nodes: N[],
+  edges: Edge[]
+): Promise<N[]> {
   if (nodes.length === 0) return nodes;
-  const dagre = await import('dagre');
+  const dagre = await import("dagre");
   const g = new dagre.graphlib.Graph();
   g.setDefaultEdgeLabel(() => ({}));
-  g.setGraph({ rankdir: 'TB', nodesep: 60, ranksep: 80 });
+  g.setGraph({ rankdir: "TB", nodesep: 60, ranksep: 80 });
 
   const nodeWidth = 72;
   const nodeHeight = 52;
-  nodes.forEach((n) => g.setNode(n.id, { width: nodeWidth, height: nodeHeight }));
-  edges.forEach((e) => g.setEdge(e.source, e.target));
+  nodes.forEach(n => g.setNode(n.id, { width: nodeWidth, height: nodeHeight }));
+  edges.forEach(e => g.setEdge(e.source, e.target));
 
   dagre.layout(g);
 
-  return nodes.map((n) => {
+  return nodes.map(n => {
     const pos = g.node(n.id);
     if (!pos) return n;
     return {
@@ -120,19 +126,19 @@ async function getLayoutedNodes<N extends Node>(nodes: N[], edges: Edge[]): Prom
   });
 }
 const NODE_COLORS = [
-  'rgb(59, 130, 246)',   // blue-500
-  'rgb(245, 158, 11)',   // amber-500
-  'rgb(34, 197, 94)',    // green-500
-  'rgb(168, 85, 247)',   // violet-500
-  'rgb(236, 72, 153)',   // pink-500
-  'rgb(20, 184, 166)',   // teal-500
-  'rgb(251, 146, 60)',   // orange-400
-  'rgb(99, 102, 241)',   // indigo-500
+  "rgb(59, 130, 246)", // blue-500
+  "rgb(245, 158, 11)", // amber-500
+  "rgb(34, 197, 94)", // green-500
+  "rgb(168, 85, 247)", // violet-500
+  "rgb(236, 72, 153)", // pink-500
+  "rgb(20, 184, 166)", // teal-500
+  "rgb(251, 146, 60)", // orange-400
+  "rgb(99, 102, 241)", // indigo-500
 ];
 
 function hashId(id: string): number {
   let h = 0;
-  for (let i = 0; i < id.length; i++) h = ((h << 5) - h) + id.charCodeAt(i) | 0;
+  for (let i = 0; i < id.length; i++) h = ((h << 5) - h + id.charCodeAt(i)) | 0;
   return Math.abs(h);
 }
 
@@ -141,21 +147,41 @@ function CircleNode({ data, id }: NodeProps) {
   const color = NODE_COLORS[hashId(label) % NODE_COLORS.length];
   return (
     <div className="flex flex-col items-center gap-1.5">
-      <span className="text-[10px] font-medium text-foreground text-center max-w-[100px] truncate px-1" title={label}>
+      <span
+        className="text-[10px] font-medium text-foreground text-center max-w-[100px] truncate px-1"
+        title={label}
+      >
         {label}
       </span>
       <div
         className="rounded-full border-2 border-white/20 shadow-md shrink-0 w-9 h-9"
         style={{ backgroundColor: color }}
       >
-        <Handle type="target" position={Position.Top} className="!w-2 !h-2 !border-2 !border-white !-top-1" />
-        <Handle type="source" position={Position.Bottom} className="!w-2 !h-2 !border-2 !border-white !-bottom-1" />
+        <Handle
+          type="target"
+          position={Position.Top}
+          className="!w-2 !h-2 !border-2 !border-white !-top-1"
+        />
+        <Handle
+          type="source"
+          position={Position.Bottom}
+          className="!w-2 !h-2 !border-2 !border-white !-bottom-1"
+        />
       </div>
     </div>
   );
 }
 
-function LabeledEdge({ id, sourceX, sourceY, targetX, targetY, sourcePosition, targetPosition, data }: EdgeProps) {
+function LabeledEdge({
+  id,
+  sourceX,
+  sourceY,
+  targetX,
+  targetY,
+  sourcePosition,
+  targetPosition,
+  data,
+}: EdgeProps) {
   const [edgePath, labelX, labelY] = getBezierPath({
     sourceX,
     sourceY,
@@ -165,23 +191,28 @@ function LabeledEdge({ id, sourceX, sourceY, targetX, targetY, sourcePosition, t
     targetPosition,
   });
   const rawLabel = data?.label ?? (data as { label?: string })?.label;
-  const label = cleanLabel(rawLabel != null ? String(rawLabel) : '');
+  const label = cleanLabel(rawLabel != null ? String(rawLabel) : "");
   const edgeData = data as Record<string, unknown> | undefined;
   const tooltipParts: string[] = [];
   if (label) tooltipParts.push(label);
-  if (edgeData?.type != null) tooltipParts.push(`Type: ${String(edgeData.type)}`);
-  if (edgeData?.name != null && String(edgeData.name) !== label) tooltipParts.push(String(edgeData.name));
-  const tooltip = tooltipParts.length > 0 ? tooltipParts.join(' · ') : undefined;
+  if (edgeData?.type != null)
+    tooltipParts.push(`Type: ${String(edgeData.type)}`);
+  if (edgeData?.name != null && String(edgeData.name) !== label)
+    tooltipParts.push(String(edgeData.name));
+  const tooltip =
+    tooltipParts.length > 0 ? tooltipParts.join(" · ") : undefined;
   return (
     <>
       <BaseEdge id={id} path={edgePath} />
       <EdgeLabelRenderer>
         <div
           className="nodrag nopan absolute rounded px-1.5 py-0.5 text-[10px] font-medium bg-background/95 border border-blue-500/20 text-foreground shadow-sm min-w-[20px] text-center cursor-default"
-          style={{ transform: `translate(${labelX}px, ${labelY}px) translate(-50%, -50%)` }}
+          style={{
+            transform: `translate(${labelX}px, ${labelY}px) translate(-50%, -50%)`,
+          }}
           title={tooltip}
         >
-          {label || '—'}
+          {label || "—"}
         </div>
       </EdgeLabelRenderer>
     </>
@@ -193,9 +224,9 @@ const edgeTypes = { labeled: LabeledEdge };
 
 // 고정 3단계 순서: 0 Living Documentation → 1 Living Product manual → 2 The Lovable of Documentation → 반복
 const STEP_PHRASE: [string, string][] = [
-  ['Living', 'Documentation'],
-  ['Living', 'Product manual'],
-  ['The Lovable of', 'Documentation'],
+  ["Living", "Documentation"],
+  ["Living", "Product manual"],
+  ["The Lovable of", "Documentation"],
 ];
 const INITIAL_DURATION_MS = 2200;
 const TYPE_DELAY_MS = 80;
@@ -206,14 +237,14 @@ export default function HeroSection() {
   const { user } = useUser();
   const clerk = useClerk();
   const [scrollY, setScrollY] = useState(0);
-  const [docPhase, setDocPhase] = useState<'initial' | 'typing'>('initial');
+  const [docPhase, setDocPhase] = useState<"initial" | "typing">("initial");
   const [stepIndex, setStepIndex] = useState(0); // 0, 1, 2 반복
   const [visibleLength, setVisibleLength] = useState(0);
   const scheduledNextRef = useRef(false);
   const typingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   const [headlinePrefix, currentPhrase] = STEP_PHRASE[stepIndex];
-  const [graphUrl, setGraphUrl] = useState('');
+  const [graphUrl, setGraphUrl] = useState("");
   const [graphRequested, setGraphRequested] = useState(false);
   const [isProcessing, setIsProcessing] = useState(false);
   const [flowNodes, setFlowNodes] = useState<Node[]>([]);
@@ -222,17 +253,15 @@ export default function HeroSection() {
   const [flowLoading, setFlowLoading] = useState(false);
 
   const onNodesChange: OnNodesChange = useCallback(
-    (changes) =>
-      setFlowNodes((nds) => applyNodeChanges(changes, nds)),
+    changes => setFlowNodes(nds => applyNodeChanges(changes, nds)),
     []
   );
   const onEdgesChange: OnEdgesChange = useCallback(
-    (changes) =>
-      setFlowEdges((eds) => applyEdgeChanges(changes, eds)),
+    changes => setFlowEdges(eds => applyEdgeChanges(changes, eds)),
     []
   );
   const onConnect: OnConnect = useCallback(
-    (params) => setFlowEdges((eds) => addEdge(params, eds)),
+    params => setFlowEdges(eds => addEdge(params, eds)),
     []
   );
 
@@ -253,24 +282,40 @@ export default function HeroSection() {
           const res = await callGraphUpsert(pending, token);
           if (!res.ok) {
             const errText = await res.text();
-            toast.error(`업서트 실패 (${res.status}): ${errText || res.statusText}`);
+            toast.error(
+              `업서트 실패 (${res.status}): ${errText || res.statusText}`
+            );
           } else {
-            toast.success('처리가 완료되었습니다.');
+            toast.success("처리가 완료되었습니다.");
             setFlowLoading(true);
             try {
               const flow = await callGraphFlow(pending, token);
-              const nodesWithType = flow.nodes.map((n) => ({ ...n, type: 'circleNode' }));
-              const edgesWithType = flow.edges.map((e) => ({
-                ...e,
-                type: 'labeled',
-                data: { ...e.data, label: (e.data as { label?: string })?.label ?? (e as { label?: string }).label ?? '' },
+              const nodesWithType = flow.nodes.map(n => ({
+                ...n,
+                type: "circleNode",
               }));
-              const layoutedNodes = await getLayoutedNodes(nodesWithType, edgesWithType);
+              const edgesWithType = flow.edges.map(e => ({
+                ...e,
+                type: "labeled",
+                data: {
+                  ...e.data,
+                  label:
+                    (e.data as { label?: string })?.label ??
+                    (e as { label?: string }).label ??
+                    "",
+                },
+              }));
+              const layoutedNodes = await getLayoutedNodes(
+                nodesWithType,
+                edgesWithType
+              );
               setFlowNodes(layoutedNodes);
               setFlowEdges(edgesWithType);
               setFlowForUrl(pending);
             } catch (e) {
-              toast.error(`그래프 로드 실패: ${e instanceof Error ? e.message : String(e)}`);
+              toast.error(
+                `그래프 로드 실패: ${e instanceof Error ? e.message : String(e)}`
+              );
             } finally {
               setFlowLoading(false);
             }
@@ -311,24 +356,40 @@ export default function HeroSection() {
           const res = await callGraphUpsert(url, token);
           if (!res.ok) {
             const errText = await res.text();
-            toast.error(`업서트 실패 (${res.status}): ${errText || res.statusText}`);
+            toast.error(
+              `업서트 실패 (${res.status}): ${errText || res.statusText}`
+            );
           } else {
-            toast.success('처리가 완료되었습니다.');
+            toast.success("처리가 완료되었습니다.");
             setFlowLoading(true);
             try {
               const flow = await callGraphFlow(url, token);
-              const nodesWithType = flow.nodes.map((n) => ({ ...n, type: 'circleNode' }));
-              const edgesWithType = flow.edges.map((e) => ({
-                ...e,
-                type: 'labeled',
-                data: { ...e.data, label: (e.data as { label?: string })?.label ?? (e as { label?: string }).label ?? '' },
+              const nodesWithType = flow.nodes.map(n => ({
+                ...n,
+                type: "circleNode",
               }));
-              const layoutedNodes = await getLayoutedNodes(nodesWithType, edgesWithType);
+              const edgesWithType = flow.edges.map(e => ({
+                ...e,
+                type: "labeled",
+                data: {
+                  ...e.data,
+                  label:
+                    (e.data as { label?: string })?.label ??
+                    (e as { label?: string }).label ??
+                    "",
+                },
+              }));
+              const layoutedNodes = await getLayoutedNodes(
+                nodesWithType,
+                edgesWithType
+              );
               setFlowNodes(layoutedNodes);
               setFlowEdges(edgesWithType);
               setFlowForUrl(url);
             } catch (e) {
-              toast.error(`그래프 로드 실패: ${e instanceof Error ? e.message : String(e)}`);
+              toast.error(
+                `그래프 로드 실패: ${e instanceof Error ? e.message : String(e)}`
+              );
             } finally {
               setFlowLoading(false);
             }
@@ -344,15 +405,15 @@ export default function HeroSection() {
 
   useEffect(() => {
     const handleScroll = () => setScrollY(window.scrollY);
-    window.addEventListener('scroll', handleScroll);
-    return () => window.removeEventListener('scroll', handleScroll);
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
   // 첫 화면: Living Documentation 전체만 보여준 뒤, 다음 단계(1. Product manual)로
   useEffect(() => {
-    if (docPhase !== 'initial') return;
+    if (docPhase !== "initial") return;
     const t = setTimeout(() => {
-      setDocPhase('typing');
+      setDocPhase("typing");
       setStepIndex(1); // Living Product manual
       setVisibleLength(0);
     }, INITIAL_DURATION_MS);
@@ -361,7 +422,7 @@ export default function HeroSection() {
 
   // 타이핑이 끝나면 잠시 대기 후 다음 단계로 (1 → 2 → 0 → 1 → 2 → 0 ...)
   useEffect(() => {
-    if (docPhase !== 'typing' || visibleLength < currentPhrase.length) {
+    if (docPhase !== "typing" || visibleLength < currentPhrase.length) {
       scheduledNextRef.current = false;
       return;
     }
@@ -369,7 +430,7 @@ export default function HeroSection() {
     scheduledNextRef.current = true;
     const t = setTimeout(() => {
       scheduledNextRef.current = false;
-      setStepIndex((s) => (s + 1) % 3);
+      setStepIndex(s => (s + 1) % 3);
       setVisibleLength(0);
     }, PAUSE_BEFORE_NEXT_MS);
     return () => clearTimeout(t);
@@ -377,9 +438,9 @@ export default function HeroSection() {
 
   // 타이핑 구간: 한 글자씩 추가. stepIndex 포함해 단계가 바뀔 때마다(2→0처럼 문구가 같아도) 새로 시작
   useEffect(() => {
-    if (docPhase !== 'typing') return;
+    if (docPhase !== "typing") return;
     typingIntervalRef.current = setInterval(() => {
-      setVisibleLength((prev) => {
+      setVisibleLength(prev => {
         if (prev >= currentPhrase.length - 1) {
           if (typingIntervalRef.current) {
             clearInterval(typingIntervalRef.current);
@@ -399,11 +460,12 @@ export default function HeroSection() {
   }, [docPhase, currentPhrase, stepIndex]);
 
   const displayDocText =
-    docPhase === 'initial'
-      ? 'Documentation'
+    docPhase === "initial"
+      ? "Documentation"
       : currentPhrase.slice(0, visibleLength);
-  const showCursor = docPhase === 'typing' && visibleLength < currentPhrase.length;
-  const displayPrefix = docPhase === 'initial' ? 'Living' : headlinePrefix;
+  const showCursor =
+    docPhase === "typing" && visibleLength < currentPhrase.length;
+  const displayPrefix = docPhase === "initial" ? "Living" : headlinePrefix;
 
   return (
     <section className="relative min-h-screen w-full pt-24 pb-20 overflow-hidden grid-overlay">
@@ -420,7 +482,9 @@ export default function HeroSection() {
           {/* Badge */}
           <div className="inline-flex items-center gap-2 px-3 sm:px-4 py-2 rounded-full bg-blue-500/10 border border-blue-500/20 mb-6">
             <Zap size={16} className="text-blue-400" />
-            <span className="text-sm font-medium text-blue-300">AI-Powered Documentation</span>
+            <span className="text-sm font-medium text-blue-300">
+              AI-Powered Documentation
+            </span>
           </div>
 
           {/* Main Headline */}
@@ -430,23 +494,38 @@ export default function HeroSection() {
             <span className="text-gradient-blue-amber inline-flex items-baseline">
               {displayDocText}
               {showCursor && (
-                <span className="inline-block w-[0.15em] h-[0.9em] ml-0.5 bg-current animate-pulse align-baseline" aria-hidden />
+                <span
+                  className="inline-block w-[0.15em] h-[0.9em] ml-0.5 bg-current animate-pulse align-baseline"
+                  aria-hidden
+                />
               )}
             </span>
           </h1>
 
           {/* Subheadline */}
           <p className="text-base sm:text-lg lg:text-xl text-muted-foreground mb-8 leading-relaxed max-w-xl animate-fade-in-up delay-100">
-            Keeping your docs in sync is exhausting—development moves faster, and manual updates can’t keep up. zylo-docs syncs your documentation automatically so you can focus on building.
+            Keeping your docs in sync is exhausting—development moves faster,
+            and manual updates can’t keep up. zylo-docs syncs your documentation
+            automatically so you can focus on building.
           </p>
 
           {/* CTA Buttons */}
           <div className="flex flex-col sm:flex-row gap-4 animate-fade-in-up delay-200">
-            <a href="https://tally.so/r/wgBlOO" target="_blank" rel="noopener noreferrer" className="px-8 py-4 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-semibold flex items-center justify-center gap-2 transition-all duration-300 hover:scale-105 glow-blue">
+            <a
+              href="https://tally.so/r/wgBlOO"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-8 py-4 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-semibold flex items-center justify-center gap-2 transition-all duration-300 hover:scale-105 glow-blue"
+            >
               Start Free Trial
               <ArrowRight size={20} />
             </a>
-            <a href="https://tally.so/r/wgBlOO" target="_blank" rel="noopener noreferrer" className="px-8 py-4 rounded-lg border border-blue-500/30 hover:border-blue-500/60 text-foreground font-semibold transition-all duration-300 hover:bg-blue-500/10 flex items-center justify-center">
+            <a
+              href="https://tally.so/r/wgBlOO"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="px-8 py-4 rounded-lg border border-blue-500/30 hover:border-blue-500/60 text-foreground font-semibold transition-all duration-300 hover:bg-blue-500/10 flex items-center justify-center"
+            >
               Watch Demo
             </a>
           </div>
@@ -476,22 +555,30 @@ export default function HeroSection() {
             }}
           >
             <div
-              className={`rounded-2xl overflow-visible border border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-amber-500/10 shadow-xl glow-blue transition-opacity ${isProcessing ? 'pointer-events-none opacity-70' : ''}`}
+              className={`rounded-2xl overflow-visible border border-blue-500/20 bg-gradient-to-br from-blue-500/10 to-amber-500/10 shadow-xl glow-blue transition-opacity ${isProcessing ? "pointer-events-none opacity-70" : ""}`}
             >
               {/* URL input block */}
               <div className="p-5 border-b border-blue-500/10">
                 <div className="flex items-center gap-2 mb-3">
                   <Link2 className="size-4 text-blue-400 shrink-0" />
-                  <span className="text-sm font-medium text-foreground">Explore your docs as a graph</span>
+                  <span className="text-sm font-medium text-foreground">
+                    Explore your docs as a graph
+                  </span>
                 </div>
                 {authLoaded && isSignedIn && user && (
                   <div className="flex items-center justify-between gap-2 mb-3 min-h-[28px] overflow-visible">
                     <span className="flex items-center gap-2 text-xs text-muted-foreground min-w-0 overflow-visible">
-                      <span className="shrink-0 overflow-visible p-1.5 -m-1.5" aria-hidden>
+                      <span
+                        className="shrink-0 overflow-visible p-1.5 -m-1.5"
+                        aria-hidden
+                      >
                         <span className="size-2 rounded-full bg-green-400 block animate-status-dot-glow" />
                       </span>
                       <span className="truncate">
-                        Signed in as {user.primaryEmailAddress?.emailAddress ?? user.firstName ?? 'Signed in'}
+                        Signed in as{" "}
+                        {user.primaryEmailAddress?.emailAddress ??
+                          user.firstName ??
+                          "Signed in"}
                       </span>
                     </span>
                     <SignOutButton>
@@ -512,14 +599,17 @@ export default function HeroSection() {
                     type="url"
                     placeholder="https://docs.example.com"
                     value={graphUrl}
-                    onChange={(e) => setGraphUrl(e.target.value)}
-                    onKeyDown={(e) => e.key === 'Enter' && handleViewClick()}
+                    onChange={e => setGraphUrl(e.target.value)}
+                    onKeyDown={e => e.key === "Enter" && handleViewClick()}
                     disabled={isProcessing}
                     className="flex-1 h-10 bg-background/80 border-blue-500/20 text-foreground placeholder:text-zinc-500 focus-visible:ring-blue-500/50 focus-visible:border-blue-500/40 disabled:opacity-70"
                   />
                   {isProcessing ? (
                     <div className="h-10 w-10 shrink-0 flex items-center justify-center rounded-lg bg-blue-500/20 border border-blue-500/30">
-                      <Loader2 className="size-5 text-blue-400 animate-spin" aria-hidden />
+                      <Loader2
+                        className="size-5 text-blue-400 animate-spin"
+                        aria-hidden
+                      />
                     </div>
                   ) : (
                     <Button
@@ -533,7 +623,9 @@ export default function HeroSection() {
                     </Button>
                   )}
                 </div>
-                <p className="mt-2 text-xs text-muted-foreground">Enter a documentation URL to visualize its structure.</p>
+                <p className="mt-2 text-xs text-muted-foreground">
+                  Enter a documentation URL to visualize its structure.
+                </p>
               </div>
 
               {/* Graph area (React Flow or placeholder) */}
@@ -554,7 +646,7 @@ export default function HeroSection() {
                         fitViewOptions={{ padding: 0.2, maxZoom: 1.2 }}
                         minZoom={0.2}
                         maxZoom={1.5}
-                        defaultEdgeOptions={{ type: 'labeled' }}
+                        defaultEdgeOptions={{ type: "labeled" }}
                         className="!bg-transparent"
                       />
                     </div>
@@ -563,15 +655,21 @@ export default function HeroSection() {
                       <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 mb-4">
                         <Loader2 className="size-7 text-blue-400 animate-spin" />
                       </div>
-                      <p className="text-sm font-medium text-foreground mb-1">그래프 불러오는 중</p>
-                      <p className="text-xs text-muted-foreground">문서 구조를 분석하고 있어요</p>
+                      <p className="text-sm font-medium text-foreground mb-1">
+                        그래프 불러오는 중
+                      </p>
+                      <p className="text-xs text-muted-foreground">
+                        문서 구조를 분석하고 있어요
+                      </p>
                     </div>
                   ) : (
                     <div className="text-center px-4 py-6">
                       <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-500/10 border border-blue-500/20 mb-3">
                         <Network className="size-7 text-blue-400" />
                       </div>
-                      <p className="text-sm font-medium text-foreground mb-1">Graph view</p>
+                      <p className="text-sm font-medium text-foreground mb-1">
+                        Graph view
+                      </p>
                       <p className="text-xs text-muted-foreground max-w-[220px] mx-auto break-all">
                         {graphUrl.trim()}
                       </p>
@@ -582,8 +680,12 @@ export default function HeroSection() {
                     <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-blue-500/5 border border-blue-500/10 mb-4">
                       <Network className="size-7 text-muted-foreground/60" />
                     </div>
-                    <p className="text-sm text-muted-foreground">Enter a URL and click View</p>
-                    <p className="text-xs text-muted-foreground/80 mt-1">to see the documentation graph</p>
+                    <p className="text-sm text-muted-foreground">
+                      Enter a URL and click View
+                    </p>
+                    <p className="text-xs text-muted-foreground/80 mt-1">
+                      to see the documentation graph
+                    </p>
                   </div>
                 )}
                 <div className="absolute inset-0 grid-overlay opacity-[0.06] pointer-events-none rounded-b-2xl" />

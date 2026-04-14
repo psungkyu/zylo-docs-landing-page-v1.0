@@ -14,7 +14,9 @@ export interface DocScoreResult {
   recommendations: string[];
 }
 
-export async function runPipelineInMemory(url: string): Promise<DocScoreResult> {
+export async function runPipelineInMemory(
+  url: string
+): Promise<DocScoreResult> {
   const pages = await crawlDocs(url, { maxPages: 10, maxDepth: 2 });
   const parsed = parsePages(pages);
   const signals = extractSignals(parsed);

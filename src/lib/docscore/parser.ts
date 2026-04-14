@@ -3,7 +3,7 @@ import type { CrawlPage } from "./types";
 import type { ParsedPage } from "./types";
 
 export function parsePages(pages: CrawlPage[]): ParsedPage[] {
-  return pages.map((p) => {
+  return pages.map(p => {
     const $ = cheerio.load(p.html);
     const title = $("title").first().text().trim() || "";
     const body = $("body").first();

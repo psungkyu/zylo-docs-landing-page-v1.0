@@ -1,5 +1,8 @@
-import React from 'react';
-import { ArrowRight, Mail, Linkedin, Github } from 'lucide-react';
+"use client";
+
+import React from "react";
+import { ArrowRight, Mail, Linkedin, Github } from "lucide-react";
+import posthog from "posthog-js";
 
 export default function CTASection() {
   return (
@@ -13,15 +16,39 @@ export default function CTASection() {
             </h2>
 
             <p className="text-lg text-muted-foreground mb-8 leading-relaxed">
-              Join teams that have eliminated manual documentation. Start your free trial today and see how zylo-docs can reduce support costs and accelerate user adoption.
+              Join teams that have eliminated manual documentation. Start your
+              free trial today and see how zylo-docs can reduce support costs
+              and accelerate user adoption.
             </p>
 
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
-              <a href="https://tally.so/r/wgBlOO" target="_blank" rel="noopener noreferrer" className="px-8 py-4 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-semibold flex items-center justify-center gap-2 transition-all duration-300 hover:scale-105 glow-blue">
+              <a
+                href="https://tally.so/r/wgBlOO"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() =>
+                  posthog.capture("cta_clicked", {
+                    label: "Start Free Trial",
+                    location: "cta_section",
+                  })
+                }
+                className="px-8 py-4 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-semibold flex items-center justify-center gap-2 transition-all duration-300 hover:scale-105 glow-blue"
+              >
                 Start Free Trial
                 <ArrowRight size={20} />
               </a>
-              <a href="https://tally.so/r/wgBlOO" target="_blank" rel="noopener noreferrer" className="px-8 py-4 rounded-lg border border-blue-500/30 hover:border-blue-500/60 text-foreground font-semibold transition-all duration-300 hover:bg-blue-500/10 flex items-center justify-center">
+              <a
+                href="https://tally.so/r/wgBlOO"
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={() =>
+                  posthog.capture("cta_clicked", {
+                    label: "Schedule Demo",
+                    location: "cta_section",
+                  })
+                }
+                className="px-8 py-4 rounded-lg border border-blue-500/30 hover:border-blue-500/60 text-foreground font-semibold transition-all duration-300 hover:bg-blue-500/10 flex items-center justify-center"
+              >
                 Schedule Demo
               </a>
             </div>
@@ -52,16 +79,17 @@ export default function CTASection() {
             {/* Brand */}
             <div>
               <div className="flex items-center mb-4">
-                <img 
-                  src="/zylo-logo.png" 
-                  alt="zylo-docs" 
+                <img
+                  src="/zylo-logo.png"
+                  alt="zylo-docs"
                   className="h-10 w-auto"
                 />
               </div>
               <p className="text-sm text-muted-foreground mb-4">
-                Living Documentation powered by AI. Always in sync with your product.
+                Living Documentation powered by AI. Always in sync with your
+                product.
               </p>
-              
+
               {/* Address */}
               <div className="text-xs text-muted-foreground leading-relaxed space-y-4">
                 <div>
@@ -78,15 +106,23 @@ export default function CTASection() {
 
             {/* Product */}
             <div>
-              <h4 className="font-mono font-bold text-foreground mb-4">Product</h4>
+              <h4 className="font-mono font-bold text-foreground mb-4">
+                Product
+              </h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
-                  <a href="#technology" className="hover:text-foreground transition-colors">
+                  <a
+                    href="#technology"
+                    className="hover:text-foreground transition-colors"
+                  >
                     Features
                   </a>
                 </li>
                 <li>
-                  <a href="#pricing" className="hover:text-foreground transition-colors">
+                  <a
+                    href="#pricing"
+                    className="hover:text-foreground transition-colors"
+                  >
                     Pricing
                   </a>
                 </li>
@@ -105,15 +141,25 @@ export default function CTASection() {
 
             {/* Company */}
             <div>
-              <h4 className="font-mono font-bold text-foreground mb-4">Company</h4>
+              <h4 className="font-mono font-bold text-foreground mb-4">
+                Company
+              </h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
-                  <a href="#" className="hover:text-foreground transition-colors">
+                  <a
+                    href="#"
+                    className="hover:text-foreground transition-colors"
+                  >
                     About
                   </a>
                 </li>
                 <li>
-                  <a href="https://blog.zylosystems.com/" className="hover:text-foreground transition-colors" target="_blank" rel="noopener noreferrer">
+                  <a
+                    href="https://blog.zylosystems.com/"
+                    className="hover:text-foreground transition-colors"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     Blog
                   </a>
                 </li>
@@ -123,7 +169,10 @@ export default function CTASection() {
                   </a>
                 </li> */}
                 <li>
-                  <a href="mailto:sales@zylosystems.com" className="hover:text-foreground transition-colors">
+                  <a
+                    href="mailto:sales@zylosystems.com"
+                    className="hover:text-foreground transition-colors"
+                  >
                     Contact
                   </a>
                 </li>
@@ -132,15 +181,27 @@ export default function CTASection() {
 
             {/* Legal */}
             <div>
-              <h4 className="font-mono font-bold text-foreground mb-4">Legal</h4>
+              <h4 className="font-mono font-bold text-foreground mb-4">
+                Legal
+              </h4>
               <ul className="space-y-2 text-sm text-muted-foreground">
                 <li>
-                  <a href="https://ballistic-place-5e1.notion.site/Zylosystems-Privacy-Policy-2393bf1cfda180afa4e0ef42abe8c927" className="hover:text-foreground transition-colors" target="_blank" rel="noopener noreferrer">
+                  <a
+                    href="https://ballistic-place-5e1.notion.site/Zylosystems-Privacy-Policy-2393bf1cfda180afa4e0ef42abe8c927"
+                    className="hover:text-foreground transition-colors"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     Privacy
                   </a>
                 </li>
                 <li>
-                  <a href="https://ballistic-place-5e1.notion.site/Terms-of-Service-2393bf1cfda1805990eefb350d9861e3" className="hover:text-foreground transition-colors" target="_blank" rel="noopener noreferrer">
+                  <a
+                    href="https://ballistic-place-5e1.notion.site/Terms-of-Service-2393bf1cfda1805990eefb350d9861e3"
+                    className="hover:text-foreground transition-colors"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
                     Terms
                   </a>
                 </li>

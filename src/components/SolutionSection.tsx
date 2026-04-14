@@ -1,5 +1,5 @@
-import React from 'react';
-import { Database, Zap, TrendingUp } from 'lucide-react';
+import React from "react";
+import { Database, Zap, TrendingUp } from "lucide-react";
 
 interface StepProps {
   number: number;
@@ -7,20 +7,27 @@ interface StepProps {
   description: string;
   image: string;
   icon: React.ReactNode;
-  accent: 'blue' | 'amber' | 'green';
+  accent: "blue" | "amber" | "green";
 }
 
-function SolutionStep({ number, title, description, image, icon, accent }: StepProps) {
+function SolutionStep({
+  number,
+  title,
+  description,
+  image,
+  icon,
+  accent,
+}: StepProps) {
   const accentClasses = {
-    blue: 'border-blue-500/30 glow-blue',
-    amber: 'border-amber-500/30 glow-amber',
-    green: 'border-green-500/30 glow-green',
+    blue: "border-blue-500/30 glow-blue",
+    amber: "border-amber-500/30 glow-amber",
+    green: "border-green-500/30 glow-green",
   };
 
   const accentTextClasses = {
-    blue: 'text-blue-400',
-    amber: 'text-amber-400',
-    green: 'text-green-400',
+    blue: "text-blue-400",
+    amber: "text-amber-400",
+    green: "text-green-400",
   };
 
   return (
@@ -35,12 +42,16 @@ function SolutionStep({ number, title, description, image, icon, accent }: StepP
         </div>
       )}
 
-      <div className={`flex-1 ${number % 2 === 0 ? 'order-1 lg:order-2' : ''}`}>
+      <div className={`flex-1 ${number % 2 === 0 ? "order-1 lg:order-2" : ""}`}>
         <div className="flex items-center gap-3 mb-4">
-          <div className={`w-12 h-12 rounded-lg bg-${accent}-500/10 border border-${accent}-500/30 flex items-center justify-center ${accentTextClasses[accent]}`}>
+          <div
+            className={`w-12 h-12 rounded-lg bg-${accent}-500/10 border border-${accent}-500/30 flex items-center justify-center ${accentTextClasses[accent]}`}
+          >
             {icon}
           </div>
-          <span className={`text-sm font-mono font-bold ${accentTextClasses[accent]}`}>
+          <span
+            className={`text-sm font-mono font-bold ${accentTextClasses[accent]}`}
+          >
             Step {number}
           </span>
         </div>
@@ -58,15 +69,23 @@ function SolutionStep({ number, title, description, image, icon, accent }: StepP
             <>
               <li className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-2 flex-shrink-0" />
-                <span className="text-muted-foreground">Product data analyzed as entities in the graph</span>
+                <span className="text-muted-foreground">
+                  Product data analyzed as entities in the graph
+                </span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-2 flex-shrink-0" />
-                <span className="text-muted-foreground">User activity modeled—what customers search and in what context</span>
+                <span className="text-muted-foreground">
+                  User activity modeled—what customers search and in what
+                  context
+                </span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-blue-400 mt-2 flex-shrink-0" />
-                <span className="text-muted-foreground">Foundation for step-by-step, trustworthy docs and solution suggestions</span>
+                <span className="text-muted-foreground">
+                  Foundation for step-by-step, trustworthy docs and solution
+                  suggestions
+                </span>
               </li>
             </>
           )}
@@ -74,15 +93,22 @@ function SolutionStep({ number, title, description, image, icon, accent }: StepP
             <>
               <li className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-2 flex-shrink-0" />
-                <span className="text-muted-foreground">Graph-based analysis of everything you connected</span>
+                <span className="text-muted-foreground">
+                  Graph-based analysis of everything you connected
+                </span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-2 flex-shrink-0" />
-                <span className="text-muted-foreground">Documentation and insights stay in sync with your product and code</span>
+                <span className="text-muted-foreground">
+                  Documentation and insights stay in sync with your product and
+                  code
+                </span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-amber-400 mt-2 flex-shrink-0" />
-                <span className="text-muted-foreground">Automatic sync with releases and changes—no manual updates</span>
+                <span className="text-muted-foreground">
+                  Automatic sync with releases and changes—no manual updates
+                </span>
               </li>
             </>
           )}
@@ -90,11 +116,15 @@ function SolutionStep({ number, title, description, image, icon, accent }: StepP
             <>
               <li className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-2 flex-shrink-0" />
-                <span className="text-muted-foreground">Product manuals for customers</span>
+                <span className="text-muted-foreground">
+                  Product manuals for customers
+                </span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-2 flex-shrink-0" />
-                <span className="text-muted-foreground">RAG with MCP-connected LLM for search optimization</span>
+                <span className="text-muted-foreground">
+                  RAG with MCP-connected LLM for search optimization
+                </span>
               </li>
               <li className="flex items-start gap-3">
                 <div className="w-1.5 h-1.5 rounded-full bg-green-400 mt-2 flex-shrink-0" />
@@ -122,35 +152,37 @@ export default function SolutionSection() {
   const steps = [
     {
       number: 1,
-      title: 'Connect',
+      title: "Connect",
       description:
-        'This step brings product data and user activity into your knowledge graph.',
-      image: '/howitworks/step-1.png',
+        "This step brings product data and user activity into your knowledge graph.",
+      image: "/howitworks/step-1.png",
       icon: <Database size={24} />,
-      accent: 'blue' as const,
+      accent: "blue" as const,
     },
     {
       number: 2,
-      title: 'Analyze & Sync',
+      title: "Analyze & Sync",
       description:
-        'This step turns connected data into usable insights and keeps them in sync.',
-      image: '/howitworks/step-2.png',
+        "This step turns connected data into usable insights and keeps them in sync.",
+      image: "/howitworks/step-2.png",
       icon: <Zap size={24} />,
-      accent: 'amber' as const,
+      accent: "amber" as const,
     },
     {
       number: 3,
-      title: 'Apply',
-      description:
-        'This step puts the graph to work in your channels.',
-      image: '/howitworks/step-3.png',
+      title: "Apply",
+      description: "This step puts the graph to work in your channels.",
+      image: "/howitworks/step-3.png",
       icon: <TrendingUp size={24} />,
-      accent: 'green' as const,
+      accent: "green" as const,
     },
   ];
 
   return (
-    <section id="solution" className="relative pt-9 lg:pt-24 bg-gradient-to-b from-transparent via-blue-500/5 to-transparent">
+    <section
+      id="solution"
+      className="relative pt-9 lg:pt-24 bg-gradient-to-b from-transparent via-blue-500/5 to-transparent"
+    >
       <div className="container">
         <div className="max-w-3xl mb-20">
           <h2 className="text-4xl lg:text-5xl font-bold font-mono text-foreground">
@@ -159,7 +191,7 @@ export default function SolutionSection() {
         </div>
 
         {/* Steps */}
-        {steps.map((step) => (
+        {steps.map(step => (
           <SolutionStep key={step.number} {...step} />
         ))}
       </div>

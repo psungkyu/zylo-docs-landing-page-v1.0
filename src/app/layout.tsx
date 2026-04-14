@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import ErrorBoundary from "@/components/ErrorBoundary";
 import { ThemeProvider } from "@/contexts/ThemeContext";
 import { ConvexClientProvider } from "@/app/ConvexClientProvider";
+import PostHogInit from "@/app/posthog-init";
 import "@/app/globals.css";
 
 const siteUrl = process.env.NEXT_PUBLIC_APP_URL || "https://www.zylo-docs.dev";
@@ -42,7 +43,11 @@ export default function RootLayout({
       <head>
         <link rel="icon" href="/favicon.ico" />
         <link rel="preconnect" href="https://fonts.googleapis.com" />
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="" />
+        <link
+          rel="preconnect"
+          href="https://fonts.gstatic.com"
+          crossOrigin=""
+        />
         <link
           href="https://fonts.googleapis.com/css2?family=Roboto+Mono:wght@400;500;600;700&family=Inter:wght@400;500;600;700&family=DM+Serif+Display:ital@0;1&display=swap"
           rel="stylesheet"
@@ -54,9 +59,10 @@ export default function RootLayout({
             <ThemeProvider defaultTheme="dark">
               <TooltipProvider>
                 {children}
-              <Toaster />
-              <Analytics />
-            </TooltipProvider>
+                <Toaster />
+                <Analytics />
+                <PostHogInit />
+              </TooltipProvider>
             </ThemeProvider>
           </ConvexClientProvider>
         </ErrorBoundary>

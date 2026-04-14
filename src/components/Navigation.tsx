@@ -1,16 +1,17 @@
 "use client";
 
-import React, { useState } from 'react';
-import { Menu, Sparkles, X } from 'lucide-react';
+import React, { useState } from "react";
+import { Menu, Sparkles, X } from "lucide-react";
+import posthog from "posthog-js";
 
 export default function Navigation() {
   const [isOpen, setIsOpen] = useState(false);
 
   const navItems = [
-    { label: 'How it works', href: '#solution' },
-    { label: 'Features', href: '#technology' },
-    { label: 'Pricing', href: '#pricing' },
-    { label: 'Blog', href: 'https://blog.zylosystems.com/', external: true },
+    { label: "How it works", href: "#solution" },
+    { label: "Features", href: "#technology" },
+    { label: "Pricing", href: "#pricing" },
+    { label: "Blog", href: "https://blog.zylosystems.com/", external: true },
   ];
 
   return (
@@ -19,11 +20,7 @@ export default function Navigation() {
         <div className="flex items-center gap-3">
           {/* Logo */}
           <a href="/" className="flex items-center">
-            <img
-              src="/zylo-logo.png"
-              alt="zylo-docs"
-              className="h-12 w-auto"
-            />
+            <img src="/zylo-logo.png" alt="zylo-docs" className="h-12 w-auto" />
           </a>
           <a
             href="/?openDocScore=1"
@@ -36,12 +33,15 @@ export default function Navigation() {
 
         {/* Desktop Navigation */}
         <div className="hidden md:flex items-center gap-8">
-          {navItems.map((item) => (
+          {navItems.map(item => (
             <a
               key={item.label}
               href={item.href}
               className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
-              {...(item.external && { target: "_blank", rel: "noopener noreferrer" })}
+              {...(item.external && {
+                target: "_blank",
+                rel: "noopener noreferrer",
+              })}
             >
               {item.label}
             </a>
@@ -50,7 +50,17 @@ export default function Navigation() {
 
         {/* CTA Button */}
         <div className="hidden md:flex items-center gap-4">
-          <a href="https://tally.so/r/wgBlOO" target="_blank" rel="noopener noreferrer" className="px-6 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-medium text-sm transition-colors glow-blue">
+          <a
+            href="https://tally.so/r/wgBlOO"
+            target="_blank"
+            rel="noopener noreferrer"
+            onClick={() =>
+              posthog.capture("nav_get_started_clicked", {
+                location: "desktop_nav",
+              })
+            }
+            className="px-6 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-medium text-sm transition-colors glow-blue"
+          >
             Get Started
           </a>
         </div>
@@ -81,18 +91,31 @@ export default function Navigation() {
       {isOpen && (
         <div className="md:hidden border-t border-border bg-background">
           <div className="container py-4 flex flex-col gap-4">
-            {navItems.map((item) => (
+            {navItems.map(item => (
               <a
                 key={item.label}
                 href={item.href}
                 className="text-sm font-medium text-muted-foreground hover:text-foreground transition-colors"
                 onClick={() => setIsOpen(false)}
-                {...(item.external && { target: "_blank", rel: "noopener noreferrer" })}
+                {...(item.external && {
+                  target: "_blank",
+                  rel: "noopener noreferrer",
+                })}
               >
                 {item.label}
               </a>
             ))}
-            <a href="https://tally.so/r/wgBlOO" target="_blank" rel="noopener noreferrer" className="w-full px-6 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-medium text-sm transition-colors glow-blue text-center">
+            <a
+              href="https://tally.so/r/wgBlOO"
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={() =>
+                posthog.capture("nav_get_started_clicked", {
+                  location: "mobile_nav",
+                })
+              }
+              className="w-full px-6 py-2 rounded-lg bg-blue-500 hover:bg-blue-600 text-white font-medium text-sm transition-colors glow-blue text-center"
+            >
               Get Started
             </a>
           </div>

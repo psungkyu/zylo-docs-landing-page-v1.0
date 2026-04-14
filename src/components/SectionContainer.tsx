@@ -1,4 +1,4 @@
-import React from 'react';
+import React from "react";
 
 interface SectionContainerProps {
   children: React.ReactNode;
@@ -9,7 +9,7 @@ interface SectionContainerProps {
 
 export default function SectionContainer({
   children,
-  className = '',
+  className = "",
   id,
   fullWidth = false,
 }: SectionContainerProps) {
@@ -17,7 +17,7 @@ export default function SectionContainer({
     <section
       id={id}
       className={`
-        ${fullWidth ? 'w-full' : 'container'}
+        ${fullWidth ? "w-full" : "container"}
         py-20 lg:py-32
         ${className}
       `}
